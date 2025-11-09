@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>诗歌欣赏 - 歌谱与朗诵</title>
+    <title>诗歌欣赏 - 在线播放</title>
     <style>
         * {
             margin: 0;
@@ -19,6 +19,72 @@
             color: #333;
         }
         
+        /* 密码保护层 */
+        .password-protection {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+        }
+        
+        .password-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+        
+        .password-box h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            text-align: center;
+        }
+        
+        .password-input:focus {
+            border-color: #4CAF50;
+            outline: none;
+        }
+        
+        .password-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .password-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .error-message {
+            color: #f44336;
+            margin-top: 10px;
+            display: none;
+        }
+        
         .container {
             max-width: 900px;
             margin: 0 auto;
@@ -26,6 +92,7 @@
             border-radius: 15px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
             overflow: hidden;
+            display: none;
         }
         
         .header {
@@ -50,15 +117,15 @@
             padding: 30px;
         }
         
-        .sheet-music-section {
-            text-align: center;
+        .section {
             margin-bottom: 40px;
         }
         
-        .sheet-music-section h2 {
+        .section h2 {
             color: #4CAF50;
             margin-bottom: 20px;
             font-size: 1.8em;
+            text-align: center;
         }
         
         .sheet-music-container {
@@ -68,6 +135,8 @@
             padding: 10px;
             background: #f9f9f9;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            max-width: 100%;
+            text-align: center;
         }
         
         .sheet-music-container img {
@@ -82,24 +151,18 @@
             transform: scale(1.02);
         }
         
-        .music-player-section {
+        .player-section {
             background: #f5f5f5;
             padding: 25px;
             border-radius: 10px;
             text-align: center;
         }
         
-        .music-player-section h2 {
-            color: #4CAF50;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-        }
-        
-        audio {
+        audio, video {
             width: 100%;
             max-width: 600px;
             margin: 15px 0;
-            border-radius: 25px;
+            border-radius: 10px;
         }
         
         .controls {
@@ -138,12 +201,32 @@
             margin-right: 10px;
         }
         
-        #volumeSlider {
+        .volume-slider {
             width: 200px;
             height: 8px;
             border-radius: 4px;
             background: #ddd;
             outline: none;
+        }
+        
+        .status {
+            margin: 15px 0;
+            padding: 10px;
+            background: #e8f5e8;
+            border-radius: 5px;
+            display: none;
+        }
+        
+        .status.success {
+            background: #e8f5e8;
+            color: #2e7d32;
+            display: block;
+        }
+        
+        .status.error {
+            background: #ffebee;
+            color: #c62828;
+            display: block;
         }
         
         .instructions {
@@ -176,7 +259,6 @@
             font-size: 0.9em;
         }
         
-        /* 响应式设计 */
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2em;
@@ -196,30 +278,73 @@
                 margin: 10px 0;
             }
         }
+        
+        .fullscreen-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .fullscreen-media {
+            max-width: 90%;
+            max-height: 90%;
+            border-radius: 10px;
+        }
+        
+        .close-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: white;
+            font-size: 30px;
+            cursor: pointer;
+            background: none;
+            border: none;
+            z-index: 1001;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="password-protection" id="passwordProtection">
+        <div class="password-box">
+            <h2>🔒 请输入访问密码</h2>
+            <input type="password" class="password-input" id="passwordInput" placeholder="请输入密码" onkeypress="handlePasswordKeypress(event)">
+            <button class="password-btn" onclick="checkPassword()">进入网站</button>
+            <div class="error-message" id="errorMessage">密码错误，请重新输入</div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer">
         <div class="header">
-            <h1>诗歌朗诵欣赏</h1>
-            <p>聆听诗意，品味经典</p>
+            <h1>🎵 诗歌朗诵欣赏</h1>
+            <p>聆听诗意，品味经典 - 腾讯云高速访问</p>
         </div>
         
         <div class="content">
-            <!-- 歌谱展示区域 -->
-            <div class="sheet-music-section">
+            <div id="status" class="status"></div>
+            
+            <div class="section">
                 <h2>🎼 诗歌歌谱</h2>
                 <div class="sheet-music-container">
-                    <img src="music/sheet-music.png" alt="诗歌歌谱" id="sheetMusic">
+                    <img src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/sheet-music.png" 
+                         alt="诗歌歌谱" 
+                         id="sheetMusic"
+                         onerror="handleImageError()">
                 </div>
-                <p style="margin-top: 10px; color: #666;">点击图片可以放大查看</p>
+                <p style="margin-top: 10px; color: #666; text-align: center;">点击图片可以全屏查看</p>
             </div>
             
-            <!-- 音频播放区域 -->
-            <div class="music-player-section">
-                <h2>🎵 诗歌朗诵</h2>
+            <div class="section player-section">
+                <h2>🎤 诗歌朗诵</h2>
                 <audio id="musicPlayer" controls>
-                    <source src="music/song.mp3" type="audio/mpeg">
+                    <source src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/song.mp3" type="audio/mpeg">
                     您的浏览器不支持音频播放，请使用现代浏览器访问。
                 </audio>
                 
@@ -227,113 +352,269 @@
                     <button class="control-btn" onclick="playMusic()">▶️ 播放</button>
                     <button class="control-btn" onclick="pauseMusic()">⏸️ 暂停</button>
                     <button class="control-btn" onclick="restartMusic()">⏮️ 重新开始</button>
-                    <button class="control-btn" onclick="toggleMute()">🔇 静音/取消</button>
+                    <button class="control-btn" onclick="toggleMute('music')">🔇 静音/取消</button>
                 </div>
                 
                 <div class="volume-control">
-                    <label for="volumeSlider">音量调节：</label>
-                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                    <label for="musicVolumeSlider">音量调节：</label>
+                    <input type="range" id="musicVolumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="1">
                 </div>
             </div>
             
-            <!-- 使用说明 -->
+            <div class="section player-section">
+                <h2>🎬 视频欣赏</h2>
+                <video id="videoPlayer" controls poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23f0f0f0'/%3E%3Ctext x='300' y='200' font-family='Arial' font-size='24' fill='%23999' text-anchor='middle'%3E视频加载中...%3C/text%3E%3C/svg%3E">
+                    <source src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/%E7%9C%8B%E4%B8%8D%E8%A7%81%E7%9A%84.mp4" type="video/mp4">
+                    您的浏览器不支持视频播放，请使用现代浏览器访问。
+                </video>
+                
+                <div class="controls">
+                    <button class="control-btn" onclick="playVideo()">▶️ 播放视频</button>
+                    <button class="control-btn" onclick="pauseVideo()">⏸️ 暂停视频</button>
+                    <button class="control-btn" onclick="restartVideo()">⏮️ 重新开始</button>
+                    <button class="control-btn" onclick="toggleMute('video')">🔇 静音/取消</button>
+                    <button class="control-btn" onclick="fullscreenVideo()">📺 全屏观看</button>
+                </div>
+                
+                <div class="volume-control">
+                    <label for="videoVolumeSlider">音量调节：</label>
+                    <input type="range" id="videoVolumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="1">
+                </div>
+            </div>
+            
             <div class="instructions">
-                <h3>使用说明</h3>
+                <h3>📋 使用说明</h3>
                 <ul>
-                    <li>点击歌谱图片可以放大查看细节</li>
-                    <li>使用播放器控制按钮或浏览器原生控件来播放诗歌</li>
+                    <li>点击歌谱图片可以全屏查看细节</li>
+                    <li>使用播放器控制按钮或浏览器原生控件来播放音频和视频</li>
                     <li>可以调节音量大小获得最佳收听体验</li>
-                    <li>建议在安静环境中聆听，品味诗歌韵味</li>
+                    <li>支持键盘快捷键：空格键播放/暂停，R键重新开始，M键静音</li>
+                    <li>文件通过腾讯云COS托管，国内访问速度快</li>
                 </ul>
             </div>
         </div>
         
         <div class="footer">
-            <p>© 2024 诗歌欣赏 | 通过 GitHub Pages 部署</p>
+            <p>© 2024 诗歌欣赏 | 腾讯云COS高速托管 | 通过 GitHub Pages 部署</p>
         </div>
     </div>
 
+    <div class="fullscreen-overlay" id="fullscreenOverlay">
+        <button class="close-btn" onclick="closeFullscreen()">×</button>
+        <img src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/sheet-music.png" 
+             alt="诗歌歌谱全屏查看" 
+             class="fullscreen-media"
+             id="fullscreenImage">
+    </div>
+
     <script>
-        // 获取音频元素
-        const player = document.getElementById('musicPlayer');
-        const volumeSlider = document.getElementById('volumeSlider');
-        const sheetMusic = document.getElementById('sheetMusic');
+        const CORRECT_PASSWORD = "123456";
         
-        // 播放控制函数
+        function checkPassword() {
+            const input = document.getElementById('passwordInput');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            if (input.value === CORRECT_PASSWORD) {
+                document.getElementById('passwordProtection').style.display = 'none';
+                document.getElementById('mainContainer').style.display = 'block';
+                setTimeout(checkResources, 100);
+            } else {
+                errorMessage.style.display = 'block';
+                input.value = '';
+                input.focus();
+            }
+        }
+        
+        function handlePasswordKeypress(event) {
+            if (event.key === 'Enter') {
+                checkPassword();
+            }
+        }
+        
+        window.addEventListener('load', function() {
+            document.getElementById('passwordInput').focus();
+        });
+
+        const musicPlayer = document.getElementById('musicPlayer');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const musicVolumeSlider = document.getElementById('musicVolumeSlider');
+        const videoVolumeSlider = document.getElementById('videoVolumeSlider');
+        const sheetMusic = document.getElementById('sheetMusic');
+        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
+        const fullscreenImage = document.getElementById('fullscreenImage');
+        const statusDiv = document.getElementById('status');
+
+        function showStatus(message, type) {
+            statusDiv.textContent = message;
+            statusDiv.className = 'status ' + type;
+        }
+
+        function checkResources() {
+            showStatus('正在检查资源可用性...', '');
+            
+            const img = new Image();
+            img.onload = function() {
+                showStatus('✅ 所有资源加载成功！现在可以正常使用', 'success');
+            };
+            img.onerror = function() {
+                showStatus('❌ 歌谱图片加载失败，请检查文件链接', 'error');
+            };
+            img.src = 'https://abc-1301182289.cos.ap-shanghai.myqcloud.com/sheet-music.png';
+            
+            musicPlayer.addEventListener('canplaythrough', function() {
+                showStatus('✅ 所有资源加载成功！现在可以正常使用', 'success');
+            });
+            
+            musicPlayer.addEventListener('error', function() {
+                showStatus('❌ 音频文件加载失败，请检查文件链接', 'error');
+            });
+            
+            videoPlayer.addEventListener('canplaythrough', function() {
+                console.log('视频加载完成');
+            });
+            
+            videoPlayer.addEventListener('error', function() {
+                console.log('视频加载失败');
+            });
+            
+            musicPlayer.load();
+            videoPlayer.load();
+        }
+
         function playMusic() {
-            player.play().catch(e => {
-                console.log("播放失败:", e);
-                alert("播放失败，请检查音频文件或浏览器设置");
+            musicPlayer.play().catch(e => {
+                console.log("音频播放失败:", e);
+                showStatus('❌ 音频播放失败，请检查音频文件', 'error');
             });
         }
         
         function pauseMusic() {
-            player.pause();
+            musicPlayer.pause();
         }
         
         function restartMusic() {
-            player.currentTime = 0;
+            musicPlayer.currentTime = 0;
             playMusic();
         }
         
-        function toggleMute() {
-            player.muted = !player.muted;
-            // 更新按钮文本（可选）
-            const muteBtn = document.querySelector('.control-btn:nth-child(4)');
-            muteBtn.textContent = player.muted ? '🔊 取消静音' : '🔇 静音';
+        function playVideo() {
+            videoPlayer.play().catch(e => {
+                console.log("视频播放失败:", e);
+                showStatus('❌ 视频播放失败，请检查视频文件', 'error');
+            });
         }
         
-        // 音量控制
-        volumeSlider.addEventListener('input', function() {
-            player.volume = this.value;
-        });
+        function pauseVideo() {
+            videoPlayer.pause();
+        }
         
-        // 初始化音量
-        player.volume = volumeSlider.value;
+        function restartVideo() {
+            videoPlayer.currentTime = 0;
+            playVideo();
+        }
         
-        // 点击歌谱图片放大功能
-        let isZoomed = false;
-        sheetMusic.addEventListener('click', function() {
-            if (isZoomed) {
-                this.style.transform = 'scale(1)';
-                this.style.cursor = 'zoom-in';
-            } else {
-                this.style.transform = 'scale(1.8)';
-                this.style.cursor = 'zoom-out';
+        function fullscreenVideo() {
+            if (videoPlayer.requestFullscreen) {
+                videoPlayer.requestFullscreen();
+            } else if (videoPlayer.webkitRequestFullscreen) {
+                videoPlayer.webkitRequestFullscreen();
+            } else if (videoPlayer.mozRequestFullScreen) {
+                videoPlayer.mozRequestFullScreen();
             }
-            isZoomed = !isZoomed;
+        }
+        
+        function toggleMute(type) {
+            if (type === 'music') {
+                musicPlayer.muted = !musicPlayer.muted;
+                const muteBtn = document.querySelector('.player-section:nth-child(2) .control-btn:nth-child(4)');
+                muteBtn.textContent = musicPlayer.muted ? '🔊 取消静音' : '🔇 静音';
+            } else if (type === 'video') {
+                videoPlayer.muted = !videoPlayer.muted;
+                const muteBtn = document.querySelector('.player-section:nth-child(3) .control-btn:nth-child(4)');
+                muteBtn.textContent = videoPlayer.muted ? '🔊 取消静音' : '🔇 静音';
+            }
+        }
+        
+        musicVolumeSlider.addEventListener('input', function() {
+            musicPlayer.volume = this.value;
         });
         
-        // 音频加载事件
-        player.addEventListener('loadeddata', function() {
-            console.log('音频加载完成，时长:', player.duration + '秒');
+        videoVolumeSlider.addEventListener('input', function() {
+            videoPlayer.volume = this.value;
         });
         
-        // 音频播放结束事件
-        player.addEventListener('ended', function() {
+        musicPlayer.volume = musicVolumeSlider.value;
+        videoPlayer.volume = videoVolumeSlider.value;
+        
+        sheetMusic.addEventListener('click', function() {
+            fullscreenOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
+        
+        function closeFullscreen() {
+            fullscreenOverlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+        
+        fullscreenOverlay.addEventListener('click', function(e) {
+            if (e.target === fullscreenOverlay) {
+                closeFullscreen();
+            }
+        });
+        
+        function handleImageError() {
+            showStatus('❌ 歌谱图片加载失败，请检查文件链接或图片格式', 'error');
+        }
+        
+        musicPlayer.addEventListener('loadeddata', function() {
+            console.log('音频加载完成，时长:', musicPlayer.duration + '秒');
+        });
+        
+        videoPlayer.addEventListener('loadeddata', function() {
+            console.log('视频加载完成，时长:', videoPlayer.duration + '秒');
+        });
+        
+        musicPlayer.addEventListener('ended', function() {
             console.log('诗歌播放结束');
+            showStatus('🎵 诗歌播放完毕', 'success');
         });
         
-        // 键盘快捷键支持
+        videoPlayer.addEventListener('ended', function() {
+            console.log('视频播放结束');
+            showStatus('🎬 视频播放完毕', 'success');
+        });
+        
         document.addEventListener('keydown', function(e) {
+            if (document.getElementById('passwordProtection').style.display !== 'none') {
+                return;
+            }
+            
+            const activeElement = document.activeElement;
+            if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
+                return;
+            }
+            
             switch(e.key) {
-                case ' ': // 空格键播放/暂停
+                case ' ':
                     e.preventDefault();
-                    if (player.paused) {
-                        playMusic();
+                    if (videoPlayer.paused) {
+                        playVideo();
                     } else {
-                        pauseMusic();
+                        pauseVideo();
                     }
                     break;
-                case 'r': // R键重新开始
+                case 'r':
                 case 'R':
                     e.preventDefault();
-                    restartMusic();
+                    restartVideo();
                     break;
-                case 'm': // M键静音
+                case 'm':
                 case 'M':
                     e.preventDefault();
-                    toggleMute();
+                    toggleMute('video');
+                    break;
+                case 'Escape':
+                    closeFullscreen();
                     break;
             }
         });
