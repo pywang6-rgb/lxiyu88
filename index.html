@@ -1,6 +1,27 @@
 <!DOCTYPE html>
 <html>
-  <body>
-    <h1>Hello Render</h1>
-  </body>
+<head>
+    <title>我的 GitHub 网站</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            text-align: center;
+        }
+        h1 {
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎉 欢迎访问我的网站！</h1>
+    <p>这是通过 GitHub Pages 部署的网站</p>
+    <p>部署时间：<span id="time"></span></p>
+    
+    <script>
+        document.getElementById('time').textContent = new Date().toLocaleString();
+    </script>
+</body>
 </html>
