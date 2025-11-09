@@ -1,27 +1,342 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
-    <title>我的 GitHub 网站</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>诗歌欣赏 - 歌谱与朗诵</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Microsoft YaHei', 'SimSun', serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 900px;
             margin: 0 auto;
-            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 30px;
             text-align: center;
         }
-        h1 {
-            color: #2c3e50;
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .sheet-music-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .sheet-music-section h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .sheet-music-container {
+            display: inline-block;
+            border: 3px solid #4CAF50;
+            border-radius: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .sheet-music-container img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .sheet-music-container img:hover {
+            transform: scale(1.02);
+        }
+        
+        .music-player-section {
+            background: #f5f5f5;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        .music-player-section h2 {
+            color: #4CAF50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        audio {
+            width: 100%;
+            max-width: 600px;
+            margin: 15px 0;
+            border-radius: 25px;
+        }
+        
+        .controls {
+            margin: 20px 0;
+        }
+        
+        .control-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            margin: 0 8px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .control-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        }
+        
+        .control-btn:active {
+            transform: translateY(0);
+        }
+        
+        .volume-control {
+            margin: 15px 0;
+        }
+        
+        .volume-control label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        #volumeSlider {
+            width: 200px;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+        }
+        
+        .instructions {
+            margin-top: 25px;
+            padding: 15px;
+            background: #e8f5e8;
+            border-radius: 8px;
+            border-left: 4px solid #4CAF50;
+        }
+        
+        .instructions h3 {
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            text-align: left;
+            margin-left: 20px;
+        }
+        
+        .instructions li {
+            margin: 8px 0;
+        }
+        
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background: #f1f1f1;
+            color: #666;
+            font-size: 0.9em;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .content {
+                padding: 20px;
+            }
+            
+            .control-btn {
+                display: block;
+                width: 100%;
+                margin: 8px 0;
+            }
+            
+            .controls {
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>🎉 欢迎访问我的网站！</h1>
-    <p>这是通过 GitHub Pages 部署的网站</p>
-    <p>部署时间：<span id="time"></span></p>
-    
+    <div class="container">
+        <div class="header">
+            <h1>诗歌朗诵欣赏</h1>
+            <p>聆听诗意，品味经典</p>
+        </div>
+        
+        <div class="content">
+            <!-- 歌谱展示区域 -->
+            <div class="sheet-music-section">
+                <h2>🎼 诗歌歌谱</h2>
+                <div class="sheet-music-container">
+                    <img src="music/sheet-music.png" alt="诗歌歌谱" id="sheetMusic">
+                </div>
+                <p style="margin-top: 10px; color: #666;">点击图片可以放大查看</p>
+            </div>
+            
+            <!-- 音频播放区域 -->
+            <div class="music-player-section">
+                <h2>🎵 诗歌朗诵</h2>
+                <audio id="musicPlayer" controls>
+                    <source src="music/song.mp3" type="audio/mpeg">
+                    您的浏览器不支持音频播放，请使用现代浏览器访问。
+                </audio>
+                
+                <div class="controls">
+                    <button class="control-btn" onclick="playMusic()">▶️ 播放</button>
+                    <button class="control-btn" onclick="pauseMusic()">⏸️ 暂停</button>
+                    <button class="control-btn" onclick="restartMusic()">⏮️ 重新开始</button>
+                    <button class="control-btn" onclick="toggleMute()">🔇 静音/取消</button>
+                </div>
+                
+                <div class="volume-control">
+                    <label for="volumeSlider">音量调节：</label>
+                    <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+                </div>
+            </div>
+            
+            <!-- 使用说明 -->
+            <div class="instructions">
+                <h3>使用说明</h3>
+                <ul>
+                    <li>点击歌谱图片可以放大查看细节</li>
+                    <li>使用播放器控制按钮或浏览器原生控件来播放诗歌</li>
+                    <li>可以调节音量大小获得最佳收听体验</li>
+                    <li>建议在安静环境中聆听，品味诗歌韵味</li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>© 2024 诗歌欣赏 | 通过 GitHub Pages 部署</p>
+        </div>
+    </div>
+
     <script>
-        document.getElementById('time').textContent = new Date().toLocaleString();
+        // 获取音频元素
+        const player = document.getElementById('musicPlayer');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const sheetMusic = document.getElementById('sheetMusic');
+        
+        // 播放控制函数
+        function playMusic() {
+            player.play().catch(e => {
+                console.log("播放失败:", e);
+                alert("播放失败，请检查音频文件或浏览器设置");
+            });
+        }
+        
+        function pauseMusic() {
+            player.pause();
+        }
+        
+        function restartMusic() {
+            player.currentTime = 0;
+            playMusic();
+        }
+        
+        function toggleMute() {
+            player.muted = !player.muted;
+            // 更新按钮文本（可选）
+            const muteBtn = document.querySelector('.control-btn:nth-child(4)');
+            muteBtn.textContent = player.muted ? '🔊 取消静音' : '🔇 静音';
+        }
+        
+        // 音量控制
+        volumeSlider.addEventListener('input', function() {
+            player.volume = this.value;
+        });
+        
+        // 初始化音量
+        player.volume = volumeSlider.value;
+        
+        // 点击歌谱图片放大功能
+        let isZoomed = false;
+        sheetMusic.addEventListener('click', function() {
+            if (isZoomed) {
+                this.style.transform = 'scale(1)';
+                this.style.cursor = 'zoom-in';
+            } else {
+                this.style.transform = 'scale(1.8)';
+                this.style.cursor = 'zoom-out';
+            }
+            isZoomed = !isZoomed;
+        });
+        
+        // 音频加载事件
+        player.addEventListener('loadeddata', function() {
+            console.log('音频加载完成，时长:', player.duration + '秒');
+        });
+        
+        // 音频播放结束事件
+        player.addEventListener('ended', function() {
+            console.log('诗歌播放结束');
+        });
+        
+        // 键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            switch(e.key) {
+                case ' ': // 空格键播放/暂停
+                    e.preventDefault();
+                    if (player.paused) {
+                        playMusic();
+                    } else {
+                        pauseMusic();
+                    }
+                    break;
+                case 'r': // R键重新开始
+                case 'R':
+                    e.preventDefault();
+                    restartMusic();
+                    break;
+                case 'm': // M键静音
+                case 'M':
+                    e.preventDefault();
+                    toggleMute();
+                    break;
+            }
+        });
     </script>
 </body>
 </html>
