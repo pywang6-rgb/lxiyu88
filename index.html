@@ -275,7 +275,7 @@
     <div class="container">
         <header>
             <h1>HLS直播播放器</h1>
-            <p class="subtitle">正在播放: http://218.71.2.58:9011//hls/test.m3u8</p>
+            <p class="subtitle">正在播放20251101</p>
         </header>
         
         <div class="player-container">
@@ -365,7 +365,7 @@
                     });
                     
                     // 绑定HLS到video元素
-                    hls.loadSource('http://218.71.2.58:9011//hls/test.m3u8');
+                    hls.loadSource('http://218.71.2.58:9011/hls/test.m3u8');
                     hls.attachMedia(video);
                     
                     // HLS事件监听
@@ -413,7 +413,7 @@
                     
                 } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
                     // Safari原生支持HLS
-                    video.src = 'http://218.71.2.58:9011//hls/test.m3u8';
+                    video.src = 'http://218.71.2.58:9011/hls/test.m3u8';
                     video.addEventListener('loadedmetadata', function() {
                         connectionStatus.textContent = '✅ 直播流连接成功';
                         connectionStatus.className = 'status success';
