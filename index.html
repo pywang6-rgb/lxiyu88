@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>电影下载器 - 实时速度监控</title>
+    <title>直播播放器 - HLS直播流</title>
+    <!-- 引入HLS.js库 -->
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
         * {
             margin: 0;
@@ -16,575 +18,564 @@
             background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
             color: #fff;
             min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
             padding: 20px;
         }
         
         .container {
             max-width: 1200px;
+            width: 100%;
             margin: 0 auto;
+            padding: 20px;
         }
         
         header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 30px;
             padding: 20px;
             background: rgba(0, 0, 0, 0.3);
             border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
         }
         
         h1 {
-            font-size: 2.8rem;
+            font-size: 2.5rem;
             margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
         .subtitle {
             font-size: 1.2rem;
-            opacity: 0.9;
-        }
-        
-        .main-content {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 30px;
-        }
-        
-        @media (max-width: 768px) {
-            .main-content {
-                grid-template-columns: 1fr;
-            }
-        }
-        
-        .download-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .movie-info {
-            display: flex;
-            margin-bottom: 25px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            overflow: hidden;
-        }
-        
-        .movie-poster {
-            width: 140px;
-            height: 200px;
-            object-fit: cover;
-        }
-        
-        .movie-details {
-            padding: 20px;
-            flex: 1;
-        }
-        
-        .movie-title {
-            font-size: 1.8rem;
-            margin-bottom: 10px;
-        }
-        
-        .movie-meta {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 15px;
-            font-size: 0.9rem;
             opacity: 0.8;
         }
         
-        .movie-description {
-            line-height: 1.5;
-            opacity: 0.9;
+        .player-container {
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            margin-bottom: 30px;
+            position: relative;
         }
         
-        .download-controls {
-            margin-top: 20px;
+        .video-wrapper {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%; /* 16:9 宽高比 */
+            background: #000;
+        }
+        
+        #videoPlayer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            outline: none;
+        }
+        
+        .player-controls {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            transition: opacity 0.3s;
+        }
+        
+        .control-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-right: 15px;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
         
         .progress-container {
-            margin-bottom: 20px;
+            flex-grow: 1;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            margin: 0 15px;
+            cursor: pointer;
+            position: relative;
         }
         
         .progress-bar {
-            height: 12px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-        
-        .progress {
             height: 100%;
-            background: linear-gradient(90deg, #00c6ff, #0072ff);
-            border-radius: 6px;
+            background: #ff5722;
+            border-radius: 4px;
             width: 0%;
-            transition: width 0.3s ease;
         }
         
-        .progress-info {
-            display: flex;
-            justify-content: space-between;
+        .time-display {
             font-size: 0.9rem;
+            white-space: nowrap;
+            margin: 0 10px;
         }
         
-        .speed-display {
-            font-size: 1.5rem;
-            text-align: center;
-            margin: 20px 0;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-        }
-        
-        .speed-value {
-            font-size: 2.2rem;
-            font-weight: bold;
-            color: #00c6ff;
-            margin: 0 5px;
-        }
-        
-        .controls {
+        .volume-container {
             display: flex;
-            gap: 15px;
-            margin-top: 25px;
+            align-items: center;
+            margin-left: 10px;
         }
         
-        button {
-            flex: 1;
-            padding: 15px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        .volume-slider {
+            width: 80px;
+            margin-left: 10px;
         }
         
-        .download-btn {
-            background: linear-gradient(90deg, #00c6ff, #0072ff);
-            color: white;
+        .quality-selector {
+            margin-left: 15px;
+            position: relative;
         }
         
-        .pause-btn {
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-        
-        .cancel-btn {
-            background: rgba(255, 50, 50, 0.7);
-            color: white;
-        }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-        
-        .stats-panel {
-            background: rgba(0, 0, 0, 0.4);
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .stats-title {
-            font-size: 1.5rem;
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .speed-chart {
-            height: 200px;
-            margin-bottom: 30px;
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 10px;
-            padding: 15px;
-        }
-        
-        .stats-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .stat-card {
+        .quality-btn {
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            padding: 15px;
-            text-align: center;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
         }
         
-        .stat-value {
-            font-size: 1.8rem;
-            font-weight: bold;
-            margin: 10px 0;
-            color: #00c6ff;
+        .quality-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 5px;
+            padding: 5px 0;
+            display: none;
+            min-width: 100px;
         }
         
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
+        .quality-menu.show {
+            display: block;
         }
         
-        footer {
-            text-align: center;
-            margin-top: 40px;
+        .quality-option {
+            padding: 8px 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .quality-option:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .player-info {
+            background: rgba(0, 0, 0, 0.4);
             padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .player-info h2 {
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+        }
+        
+        .info-label {
             font-size: 0.9rem;
             opacity: 0.7;
         }
         
-        .quality-selector {
-            display: flex;
-            gap: 10px;
-            margin: 15px 0;
+        .info-value {
+            font-size: 1.1rem;
+            font-weight: bold;
         }
         
-        .quality-btn {
-            padding: 8px 15px;
+        .status {
+            text-align: center;
+            padding: 15px;
             background: rgba(255, 255, 255, 0.1);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+            border-radius: 10px;
+            margin-top: 20px;
         }
         
-        .quality-btn.active {
-            background: #0072ff;
+        .status.success {
+            background: rgba(76, 175, 80, 0.3);
+            border-left: 4px solid #4caf50;
+        }
+        
+        .status.error {
+            background: rgba(244, 67, 54, 0.3);
+            border-left: 4px solid #f44336;
+        }
+        
+        .status.loading {
+            background: rgba(255, 152, 0, 0.3);
+            border-left: 4px solid #ff9800;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .volume-slider {
+                width: 60px;
+            }
+            
+            .player-controls {
+                flex-wrap: wrap;
+            }
+            
+            .progress-container {
+                order: 1;
+                width: 100%;
+                margin: 10px 0;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>电影下载器</h1>
-            <p class="subtitle">高速下载，实时监控下载速度</p>
+            <h1>HLS直播播放器</h1>
+            <p class="subtitle">正在播放: http://218.71.2.58:9011//hls/test.m3u8</p>
         </header>
         
-        <div class="main-content">
-            <div class="download-panel">
-                <div class="movie-info">
-                    <img src="https://via.placeholder.com/140x200/2c3e50/ffffff?text=Movie+Poster" alt="电影海报" class="movie-poster">
-                    <div class="movie-details">
-                        <h2 class="movie-title">星际穿越</h2>
-                        <div class="movie-meta">
-                            <span>科幻</span>
-                            <span>2014</span>
-                            <span>2小时49分钟</span>
-                            <span>8.6/10</span>
-                        </div>
-                        <p class="movie-description">一群探险家利用他们针对虫洞的新发现，超越人类对于太空旅行的极限，从而开始在广袤的宇宙中进行星际航行。</p>
-                    </div>
+        <div class="player-container">
+            <div class="video-wrapper">
+                <video id="videoPlayer" controls></video>
+            </div>
+            
+            <div class="player-controls">
+                <button class="control-btn" id="playPauseBtn">⏸️</button>
+                <div class="progress-container" id="progressContainer">
+                    <div class="progress-bar" id="progressBar"></div>
+                </div>
+                <span class="time-display" id="timeDisplay">00:00:00</span>
+                
+                <div class="volume-container">
+                    <button class="control-btn" id="muteBtn">🔊</button>
+                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1">
                 </div>
                 
                 <div class="quality-selector">
-                    <div class="quality-btn active">1080p</div>
-                    <div class="quality-btn">720p</div>
-                    <div class="quality-btn">480p</div>
+                    <button class="quality-btn" id="qualityBtn">画质</button>
+                    <div class="quality-menu" id="qualityMenu">
+                        <div class="quality-option" data-quality="auto">自动</div>
+                        <div class="quality-option" data-quality="high">高清</div>
+                        <div class="quality-option" data-quality="medium">标清</div>
+                        <div class="quality-option" data-quality="low">流畅</div>
+                    </div>
                 </div>
                 
-                <div class="download-controls">
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress" id="progress"></div>
-                        </div>
-                        <div class="progress-info">
-                            <span>已下载: <span id="downloaded">0 MB</span></span>
-                            <span>剩余: <span id="remaining">2.1 GB</span></span>
-                        </div>
-                    </div>
-                    
-                    <div class="speed-display">
-                        当前速度: <span class="speed-value" id="current-speed">0</span> MB/s
-                    </div>
-                    
-                    <div class="controls">
-                        <button class="download-btn" id="download-btn">开始下载</button>
-                        <button class="pause-btn" id="pause-btn" disabled>暂停</button>
-                        <button class="cancel-btn" id="cancel-btn">取消</button>
-                    </div>
-                </div>
+                <button class="control-btn" id="fullscreenBtn">⛶</button>
             </div>
-            
-            <div class="stats-panel">
-                <h3 class="stats-title">下载统计</h3>
-                
-                <div class="speed-chart" id="speed-chart">
-                    <!-- 速度图表将通过JavaScript绘制 -->
+        </div>
+        
+        <div class="player-info">
+            <h2>直播信息</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">直播源</div>
+                    <div class="info-value">HLS 直播流</div>
                 </div>
-                
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">平均速度</div>
-                        <div class="stat-value" id="avg-speed">0 MB/s</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">峰值速度</div>
-                        <div class="stat-value" id="peak-speed">0 MB/s</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">已用时间</div>
-                        <div class="stat-value" id="elapsed-time">0:00</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">剩余时间</div>
-                        <div class="stat-value" id="eta">--:--</div>
-                    </div>
+                <div class="info-item">
+                    <div class="info-label">播放地址</div>
+                    <div class="info-value">http://218.71.2.58:9011//hls/test.m3u8</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">播放状态</div>
+                    <div class="info-value" id="playStatus">准备播放</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">缓冲状态</div>
+                    <div class="info-value" id="bufferStatus">--</div>
                 </div>
             </div>
         </div>
         
-        <footer>
-            <p>注意：本页面仅为演示用途，不提供实际电影下载功能</p>
-        </footer>
+        <div class="status" id="connectionStatus">
+            <span class="loading-spinner"></span>正在连接直播流...
+        </div>
     </div>
 
     <script>
-        // 模拟下载状态和数据
-        let downloadState = {
-            isDownloading: false,
-            isPaused: false,
-            progress: 0,
-            downloaded: 0, // MB
-            totalSize: 2100, // MB (2.1 GB)
-            startTime: null,
-            speeds: [],
-            speedChartData: [],
-            intervalId: null
-        };
-
-        // DOM 元素
-        const progressBar = document.getElementById('progress');
-        const downloadedEl = document.getElementById('downloaded');
-        const remainingEl = document.getElementById('remaining');
-        const currentSpeedEl = document.getElementById('current-speed');
-        const avgSpeedEl = document.getElementById('avg-speed');
-        const peakSpeedEl = document.getElementById('peak-speed');
-        const elapsedTimeEl = document.getElementById('elapsed-time');
-        const etaEl = document.getElementById('eta');
-        const downloadBtn = document.getElementById('download-btn');
-        const pauseBtn = document.getElementById('pause-btn');
-        const cancelBtn = document.getElementById('cancel-btn');
-        const speedChart = document.getElementById('speed-chart');
-
-        // 初始化
-        function init() {
-            updateDisplay();
-            setupChart();
+        document.addEventListener('DOMContentLoaded', function() {
+            const video = document.getElementById('videoPlayer');
+            const playPauseBtn = document.getElementById('playPauseBtn');
+            const progressBar = document.getElementById('progressBar');
+            const progressContainer = document.getElementById('progressContainer');
+            const timeDisplay = document.getElementById('timeDisplay');
+            const muteBtn = document.getElementById('muteBtn');
+            const volumeSlider = document.getElementById('volumeSlider');
+            const fullscreenBtn = document.getElementById('fullscreenBtn');
+            const playStatus = document.getElementById('playStatus');
+            const bufferStatus = document.getElementById('bufferStatus');
+            const connectionStatus = document.getElementById('connectionStatus');
+            const qualityBtn = document.getElementById('qualityBtn');
+            const qualityMenu = document.getElementById('qualityMenu');
             
-            // 事件监听
-            downloadBtn.addEventListener('click', toggleDownload);
-            pauseBtn.addEventListener('click', togglePause);
-            cancelBtn.addEventListener('click', cancelDownload);
+            let hls;
+            let isLive = true; // 直播流没有固定时长
             
-            // 模拟初始速度数据
-            for (let i = 0; i < 20; i++) {
-                downloadState.speedChartData.push(0);
-            }
-        }
-
-        // 设置速度图表
-        function setupChart() {
-            // 创建一个简单的SVG图表
-            speedChart.innerHTML = '<svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none"></svg>';
-        }
-
-        // 更新速度图表
-        function updateChart() {
-            const svg = speedChart.querySelector('svg');
-            const data = downloadState.speedChartData;
-            const maxSpeed = Math.max(...data, 10); // 确保图表有适当的高度
-            
-            // 创建折线路径
-            let pathData = '';
-            for (let i = 0; i < data.length; i++) {
-                const x = (i / (data.length - 1)) * 400;
-                const y = 200 - (data[i] / maxSpeed) * 180; // 留出一些边距
-                
-                if (i === 0) {
-                    pathData += `M ${x},${y} `;
+            // 初始化HLS播放器
+            function initHLS() {
+                if (Hls.isSupported()) {
+                    hls = new Hls({
+                        enableWorker: false,
+                        lowLatencyMode: true,
+                        backBufferLength: 90
+                    });
+                    
+                    // 绑定HLS到video元素
+                    hls.loadSource('http://218.71.2.58:9011//hls/test.m3u8');
+                    hls.attachMedia(video);
+                    
+                    // HLS事件监听
+                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                        console.log('直播流加载成功');
+                        connectionStatus.textContent = '✅ 直播流连接成功';
+                        connectionStatus.className = 'status success';
+                        playStatus.textContent = '已连接，准备播放';
+                        
+                        // 自动开始播放
+                        video.play().catch(e => {
+                            console.log('自动播放被阻止:', e);
+                            playStatus.textContent = '点击播放按钮开始';
+                        });
+                    });
+                    
+                    hls.on(Hls.Events.ERROR, function(event, data) {
+                        console.error('HLS错误:', data);
+                        if (data.fatal) {
+                            switch(data.type) {
+                                case Hls.ErrorTypes.NETWORK_ERROR:
+                                    connectionStatus.textContent = '❌ 网络错误: ' + data.details;
+                                    connectionStatus.className = 'status error';
+                                    break;
+                                case Hls.ErrorTypes.MEDIA_ERROR:
+                                    connectionStatus.textContent = '❌ 媒体错误: ' + data.details;
+                                    connectionStatus.className = 'status error';
+                                    break;
+                                default:
+                                    connectionStatus.textContent = '❌ 不可恢复的错误';
+                                    connectionStatus.className = 'status error';
+                                    hls.destroy();
+                                    break;
+                            }
+                        }
+                    });
+                    
+                    hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
+                        console.log('清晰度切换:', data);
+                    });
+                    
+                    hls.on(Hls.Events.BUFFER_CREATED, function(event, data) {
+                        updateBufferStatus();
+                    });
+                    
+                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                    // Safari原生支持HLS
+                    video.src = 'http://218.71.2.58:9011//hls/test.m3u8';
+                    video.addEventListener('loadedmetadata', function() {
+                        connectionStatus.textContent = '✅ 直播流连接成功';
+                        connectionStatus.className = 'status success';
+                        playStatus.textContent = '已连接，准备播放';
+                    });
                 } else {
-                    pathData += `L ${x},${y} `;
+                    connectionStatus.textContent = '❌ 您的浏览器不支持HLS直播流播放';
+                    connectionStatus.className = 'status error';
                 }
             }
             
-            // 创建填充区域
-            let areaData = pathData + `L 400,200 L 0,200 Z`;
+            // 播放/暂停控制
+            playPauseBtn.addEventListener('click', function() {
+                if (video.paused) {
+                    video.play();
+                    playPauseBtn.textContent = '⏸️';
+                    playStatus.textContent = '播放中';
+                } else {
+                    video.pause();
+                    playPauseBtn.textContent = '▶️';
+                    playStatus.textContent = '已暂停';
+                }
+            });
             
-            // 清除之前的图表
-            svg.innerHTML = '';
+            // 更新进度条 (直播流特殊处理)
+            video.addEventListener('timeupdate', function() {
+                if (isLive) {
+                    // 直播流显示当前时间
+                    const currentTime = formatTime(video.currentTime);
+                    timeDisplay.textContent = currentTime;
+                    
+                    // 直播流进度条特殊处理
+                    if (video.duration && video.duration !== Infinity) {
+                        const progress = (video.currentTime / video.duration) * 100;
+                        progressBar.style.width = `${progress}%`;
+                    } else {
+                        // 对于无限直播流，进度条保持满状态
+                        progressBar.style.width = `100%`;
+                    }
+                } else {
+                    // 点播视频处理
+                    const progress = (video.currentTime / video.duration) * 100;
+                    progressBar.style.width = `${progress}%`;
+                    
+                    const currentTime = formatTime(video.currentTime);
+                    const duration = formatTime(video.duration);
+                    timeDisplay.textContent = `${currentTime} / ${duration}`;
+                }
+            });
             
-            // 添加填充区域
-            const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            area.setAttribute('d', areaData);
-            area.setAttribute('fill', 'rgba(0, 198, 255, 0.2)');
-            area.setAttribute('stroke', 'none');
-            svg.appendChild(area);
+            // 点击进度条跳转 (直播流禁用)
+            progressContainer.addEventListener('click', function(e) {
+                if (!isLive) {
+                    const rect = progressContainer.getBoundingClientRect();
+                    const pos = (e.clientX - rect.left) / rect.width;
+                    video.currentTime = pos * video.duration;
+                }
+            });
             
-            // 添加折线
-            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-            line.setAttribute('d', pathData);
-            line.setAttribute('fill', 'none');
-            line.setAttribute('stroke', '#00c6ff');
-            line.setAttribute('stroke-width', '2');
-            svg.appendChild(line);
+            // 音量控制
+            volumeSlider.addEventListener('input', function() {
+                video.volume = volumeSlider.value;
+                updateVolumeIcon();
+            });
             
-            // 添加网格线
-            for (let i = 0; i <= 4; i++) {
-                const y = 200 - (i * 40);
-                const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-                gridLine.setAttribute('x1', '0');
-                gridLine.setAttribute('y1', y);
-                gridLine.setAttribute('x2', '400');
-                gridLine.setAttribute('y2', y);
-                gridLine.setAttribute('stroke', 'rgba(255, 255, 255, 0.1)');
-                gridLine.setAttribute('stroke-width', '1');
-                svg.appendChild(gridLine);
-            }
-        }
-
-        // 切换下载状态
-        function toggleDownload() {
-            if (downloadState.isDownloading) {
-                pauseDownload();
-            } else {
-                startDownload();
-            }
-        }
-
-        // 开始下载
-        function startDownload() {
-            if (downloadState.progress >= 100) return;
+            muteBtn.addEventListener('click', function() {
+                video.muted = !video.muted;
+                updateVolumeIcon();
+            });
             
-            downloadState.isDownloading = true;
-            downloadState.isPaused = false;
-            downloadState.startTime = new Date();
-            
-            downloadBtn.textContent = '暂停下载';
-            pauseBtn.disabled = false;
-            
-            // 模拟下载过程
-            downloadState.intervalId = setInterval(updateDownload, 100);
-        }
-
-        // 暂停下载
-        function pauseDownload() {
-            downloadState.isDownloading = false;
-            downloadState.isPaused = true;
-            
-            downloadBtn.textContent = '继续下载';
-            pauseBtn.disabled = true;
-            
-            clearInterval(downloadState.intervalId);
-        }
-
-        // 切换暂停状态
-        function togglePause() {
-            if (downloadState.isPaused) {
-                startDownload();
-            } else {
-                pauseDownload();
-            }
-        }
-
-        // 取消下载
-        function cancelDownload() {
-            downloadState.isDownloading = false;
-            downloadState.isPaused = false;
-            downloadState.progress = 0;
-            downloadState.downloaded = 0;
-            downloadState.speeds = [];
-            downloadState.speedChartData = new Array(20).fill(0);
-            
-            downloadBtn.textContent = '开始下载';
-            pauseBtn.disabled = true;
-            
-            clearInterval(downloadState.intervalId);
-            updateDisplay();
-            updateChart();
-        }
-
-        // 更新下载进度
-        function updateDownload() {
-            if (!downloadState.isDownloading) return;
-            
-            // 模拟下载速度波动
-            const baseSpeed = 5; // MB/s
-            const variation = Math.random() * 3; // 随机变化
-            const currentSpeed = baseSpeed + variation;
-            
-            // 更新下载数据
-            downloadState.downloaded += currentSpeed / 10; // 每100ms下载的量
-            downloadState.progress = (downloadState.downloaded / downloadState.totalSize) * 100;
-            
-            // 记录速度
-            downloadState.speeds.push(currentSpeed);
-            downloadState.speedChartData.push(currentSpeed);
-            if (downloadState.speedChartData.length > 20) {
-                downloadState.speedChartData.shift();
+            function updateVolumeIcon() {
+                if (video.muted || video.volume === 0) {
+                    muteBtn.textContent = '🔇';
+                } else if (video.volume < 0.5) {
+                    muteBtn.textContent = '🔈';
+                } else {
+                    muteBtn.textContent = '🔊';
+                }
+                volumeSlider.value = video.muted ? 0 : video.volume;
             }
             
-            // 检查是否完成
-            if (downloadState.progress >= 100) {
-                downloadState.progress = 100;
-                downloadState.downloaded = downloadState.totalSize;
-                downloadState.isDownloading = false;
-                downloadBtn.textContent = '下载完成';
-                pauseBtn.disabled = true;
-                clearInterval(downloadState.intervalId);
+            // 全屏控制
+            fullscreenBtn.addEventListener('click', function() {
+                if (!document.fullscreenElement) {
+                    video.requestFullscreen().catch(err => {
+                        console.error(`全屏请求错误: ${err.message}`);
+                    });
+                } else {
+                    document.exitFullscreen();
+                }
+            });
+            
+            // 画质选择
+            qualityBtn.addEventListener('click', function() {
+                qualityMenu.classList.toggle('show');
+            });
+            
+            // 关闭画质菜单当点击其他地方时
+            document.addEventListener('click', function(e) {
+                if (!qualityBtn.contains(e.target) && !qualityMenu.contains(e.target)) {
+                    qualityMenu.classList.remove('show');
+                }
+            });
+            
+            // 画质选项点击事件
+            document.querySelectorAll('.quality-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    const quality = this.getAttribute('data-quality');
+                    // 在实际应用中，这里应该切换不同的HLS级别
+                    console.log('切换到画质:', quality);
+                    qualityBtn.textContent = `画质: ${this.textContent}`;
+                    qualityMenu.classList.remove('show');
+                });
+            });
+            
+            // 格式化时间显示
+            function formatTime(seconds) {
+                const hrs = Math.floor(seconds / 3600);
+                const mins = Math.floor((seconds % 3600) / 60);
+                const secs = Math.floor(seconds % 60);
+                return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
             }
             
-            updateDisplay();
-            updateChart();
-        }
-
-        // 更新显示
-        function updateDisplay() {
-            // 更新进度条
-            progressBar.style.width = `${downloadState.progress}%`;
+            // 更新缓冲状态
+            function updateBufferStatus() {
+                if (video.buffered && video.buffered.length > 0) {
+                    const bufferedEnd = video.buffered.end(video.buffered.length - 1);
+                    const bufferPercentage = (bufferedEnd / video.duration) * 100;
+                    bufferStatus.textContent = `${Math.round(bufferPercentage)}% 已缓冲`;
+                } else {
+                    bufferStatus.textContent = '0% 已缓冲';
+                }
+            }
             
-            // 更新下载量
-            downloadedEl.textContent = `${downloadState.downloaded.toFixed(1)} MB`;
-            remainingEl.textContent = `${(downloadState.totalSize - downloadState.downloaded).toFixed(1)} MB`;
+            // 视频事件监听
+            video.addEventListener('waiting', function() {
+                playStatus.textContent = '缓冲中...';
+            });
             
-            // 计算并显示速度
-            const currentSpeed = downloadState.speeds.length > 0 ? 
-                downloadState.speeds[downloadState.speeds.length - 1] : 0;
-            currentSpeedEl.textContent = currentSpeed.toFixed(1);
+            video.addEventListener('playing', function() {
+                playStatus.textContent = '播放中';
+            });
             
-            // 计算平均速度
-            const avgSpeed = downloadState.speeds.length > 0 ? 
-                downloadState.speeds.reduce((a, b) => a + b, 0) / downloadState.speeds.length : 0;
-            avgSpeedEl.textContent = `${avgSpeed.toFixed(1)} MB/s`;
+            video.addEventListener('ended', function() {
+                playPauseBtn.textContent = '▶️';
+                playStatus.textContent = '播放结束';
+            });
             
-            // 计算峰值速度
-            const peakSpeed = downloadState.speeds.length > 0 ? 
-                Math.max(...downloadState.speeds) : 0;
-            peakSpeedEl.textContent = `${peakSpeed.toFixed(1)} MB/s`;
-            
-            // 计算时间
-            if (downloadState.startTime && downloadState.isDownloading) {
-                const now = new Date();
-                const elapsedSeconds = Math.floor((now - downloadState.startTime) / 1000);
-                const elapsedMinutes = Math.floor(elapsedSeconds / 60);
-                const elapsedSecondsRemainder = elapsedSeconds % 60;
-                elapsedTimeEl.textContent = `${elapsedMinutes}:${elapsedSecondsRemainder.toString().padStart(2, '0')}`;
+            // 检测是否为直播流
+            video.addEventListener('loadedmetadata', function() {
+                isLive = !isFinite(video.duration);
+                console.log('是否为直播流:', isLive);
                 
-                // 计算剩余时间
-                if (currentSpeed > 0) {
-                    const remainingMB = downloadState.totalSize - downloadState.downloaded;
-                    const remainingSeconds = Math.floor(remainingMB / currentSpeed);
-                    const remainingMinutes = Math.floor(remainingSeconds / 60);
-                    const remainingSecondsRemainder = remainingSeconds % 60;
-                    etaEl.textContent = `${remainingMinutes}:${remainingSecondsRemainder.toString().padStart(2, '0')}`;
+                if (isLive) {
+                    timeDisplay.textContent = '直播';
+                    progressBar.style.width = '100%';
                 }
-            }
-        }
-
-        // 初始化
-        window.onload = init;
+            });
+            
+            // 初始化HLS播放器
+            initHLS();
+        });
     </script>
 </body>
 </html>
