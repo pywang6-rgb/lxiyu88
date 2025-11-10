@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>直播播放器 - HLS直播流</title>
-    <!-- 引入HLS.js库 -->
-    <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+    <title>20251109主崇</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         * {
             margin: 0;
@@ -16,674 +15,485 @@
         
         body {
             background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
-            color: #fff;
+            color: #333;
+            line-height: 1.6;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 20px;
         }
         
-        .container {
-            max-width: 1200px;
+        .password-container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
             width: 100%;
-            margin: 0 auto;
-            padding: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            backdrop-filter: blur(5px);
+        }
+        
+        .password-box {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            width: 90%;
+            max-width: 450px;
+            transform: translateY(-20px);
+            animation: fadeIn 0.5s ease-out forwards;
+        }
+        
+        @keyframes fadeIn {
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .password-box h2 {
+            margin-bottom: 25px;
+            color: #2c3e50;
+            font-size: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .password-input {
+            width: 100%;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .password-input:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .password-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(to right, #3498db, #2c3e50);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .password-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .error-message {
+            color: #e74c3c;
+            margin-top: 15px;
+            display: none;
+            font-weight: 500;
+        }
+        
+        .main-container {
+            display: none;
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+            margin: 20px 0;
+            opacity: 0;
+            animation: containerFadeIn 0.8s ease-out forwards;
+        }
+        
+        @keyframes containerFadeIn {
+            to {
+                opacity: 1;
+            }
         }
         
         header {
             text-align: center;
-            margin-bottom: 30px;
-            padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 15px;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-        
-        h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
-        }
-        
-        .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.8;
-        }
-        
-        .player-container {
-            background: rgba(0, 0, 0, 0.6);
-            border-radius: 15px;
+            padding: 30px 20px;
+            background: linear-gradient(to right, #2c3e50, #3498db);
+            color: white;
+            position: relative;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-            margin-bottom: 30px;
-            position: relative;
         }
         
-        .video-wrapper {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%; /* 16:9 宽高比 */
-            background: #000;
-        }
-        
-        #videoPlayer {
+        header::before {
+            content: "";
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            outline: none;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,96L48,112C96,128,192,160,288,186.7C384,213,480,235,576,213.3C672,192,768,128,864,128C960,128,1056,192,1152,192C1248,192,1344,128,1392,96L1440,64L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: center;
         }
         
-        .player-controls {
+        header h1 {
+            font-size: 36px;
+            margin-bottom: 10px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .date {
+            font-size: 20px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .section-title {
+            margin: 40px 0 20px;
+            padding: 0 20px 15px;
+            border-bottom: 3px solid #3498db;
+            color: #2c3e50;
+            font-size: 28px;
             display: flex;
             align-items: center;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.7);
-            transition: opacity 0.3s;
+            gap: 10px;
         }
         
-        .control-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.2rem;
-            cursor: pointer;
-            margin-right: 15px;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: background 0.3s;
-        }
-        
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .progress-container {
-            flex-grow: 1;
-            height: 8px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 4px;
-            margin: 0 15px;
-            cursor: pointer;
-            position: relative;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            background: #ff5722;
-            border-radius: 4px;
-            width: 0%;
-        }
-        
-        .time-display {
-            font-size: 0.9rem;
-            white-space: nowrap;
-            margin: 0 10px;
-        }
-        
-        .volume-container {
-            display: flex;
-            align-items: center;
-            margin-left: 10px;
-        }
-        
-        .volume-slider {
-            width: 80px;
-            margin-left: 10px;
-        }
-        
-        .quality-selector {
-            margin-left: 15px;
-            position: relative;
-        }
-        
-        .quality-btn {
-            background: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: none;
-            padding: 5px 10px;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        
-        .quality-menu {
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 5px;
-            padding: 5px 0;
-            display: none;
-            min-width: 100px;
-        }
-        
-        .quality-menu.show {
-            display: block;
-        }
-        
-        .quality-option {
-            padding: 8px 15px;
-            cursor: pointer;
-            transition: background 0.3s;
-        }
-        
-        .quality-option:hover {
-            background: rgba(255, 255, 255, 0.2);
-        }
-        
-        .player-info {
-            background: rgba(0, 0, 0, 0.4);
-            padding: 20px;
-            border-radius: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .player-info h2 {
-            margin-bottom: 15px;
-            font-size: 1.5rem;
-        }
-        
-        .info-grid {
+        .hymns-container {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+            padding: 0 20px;
         }
         
-        .info-item {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 10px;
+        .hymn-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .hymn-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .hymn-img-container {
+            height: 250px;
+            overflow: hidden;
+        }
+        
+        .hymn-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .hymn-card:hover .hymn-img {
+            transform: scale(1.05);
+        }
+        
+        .hymn-info {
+            padding: 20px;
+        }
+        
+        .hymn-title {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .audio-player {
+            width: 100%;
+            margin-top: 10px;
             border-radius: 8px;
         }
         
-        .info-label {
-            font-size: 0.9rem;
+        .video-section {
+            padding: 0 20px 40px;
+        }
+        
+        .video-container {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .video-player {
+            width: 100%;
+            height: auto;
+            min-height: 450px;
+            border: none;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding: 25px 20px;
+            color: #7f8c8d;
+            background: #f8f9fa;
+            border-top: 1px solid #eee;
+        }
+        
+        .footer-content {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .footer-content p {
+            margin-bottom: 10px;
+        }
+        
+        .copyright {
+            font-size: 14px;
+            margin-top: 15px;
             opacity: 0.7;
         }
         
-        .info-value {
-            font-size: 1.1rem;
-            font-weight: bold;
-        }
-        
-        .status {
-            text-align: center;
-            padding: 15px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-        
-        .status.success {
-            background: rgba(76, 175, 80, 0.3);
-            border-left: 4px solid #4caf50;
-        }
-        
-        .status.error {
-            background: rgba(244, 67, 54, 0.3);
-            border-left: 4px solid #f44336;
-        }
-        
-        .status.loading {
-            background: rgba(255, 152, 0, 0.3);
-            border-left: 4px solid #ff9800;
-        }
-        
-        .loading-spinner {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .network-stats {
-            display: flex;
-            justify-content: space-around;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .stat-card {
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 10px;
-            padding: 15px;
-            min-width: 150px;
-            text-align: center;
-            flex: 1;
-        }
-        
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: bold;
-            margin: 10px 0;
-        }
-        
-        .stat-label {
-            font-size: 0.9rem;
-            opacity: 0.8;
-        }
-        
         @media (max-width: 768px) {
-            h1 {
-                font-size: 1.8rem;
-            }
-            
-            .info-grid {
+            .hymns-container {
                 grid-template-columns: 1fr;
             }
             
-            .volume-slider {
-                width: 60px;
+            .video-player {
+                min-height: 300px;
             }
             
-            .player-controls {
-                flex-wrap: wrap;
+            header h1 {
+                font-size: 28px;
             }
             
-            .progress-container {
-                order: 1;
-                width: 100%;
-                margin: 10px 0;
+            .section-title {
+                font-size: 24px;
             }
-            
-            .network-stats {
-                flex-direction: column;
-            }
+        }
+        
+        .back-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #3498db;
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            cursor: pointer;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s, background 0.3s;
+            z-index: 100;
+        }
+        
+        .back-btn:hover {
+            transform: translateY(-3px);
+            background: #2980b9;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>HLS直播播放器</h1>
-            <p class="subtitle">正在播放: http://218.71.2.58:9011/hls/test.m3u8</p>
-        </header>
-        
-        <div class="player-container">
-            <div class="video-wrapper">
-                <video id="videoPlayer" controls></video>
+    <!-- 密码输入界面 -->
+    <div class="password-container" id="passwordContainer">
+        <div class="password-box">
+            <h2><i class="fas fa-lock"></i> 请输入密码</h2>
+            <input type="password" class="password-input" id="passwordInput" placeholder="输入密码">
+            <button class="password-btn" id="passwordBtn">进入主崇页面</button>
+            <div class="error-message" id="errorMessage">
+                <i class="fas fa-exclamation-circle"></i> 密码错误，请重新输入
             </div>
-            
-            <div class="player-controls">
-                <button class="control-btn" id="playPauseBtn">⏸️</button>
-                <div class="progress-container" id="progressContainer">
-                    <div class="progress-bar" id="progressBar"></div>
-                </div>
-                <span class="time-display" id="timeDisplay">00:00:00</span>
-                
-                <div class="volume-container">
-                    <button class="control-btn" id="muteBtn">🔊</button>
-                    <input type="range" class="volume-slider" id="volumeSlider" min="0" max="1" step="0.1" value="1">
-                </div>
-                
-                <div class="quality-selector">
-                    <button class="quality-btn" id="qualityBtn">画质</button>
-                    <div class="quality-menu" id="qualityMenu">
-                        <div class="quality-option" data-quality="auto">自动</div>
-                        <div class="quality-option" data-quality="high">高清</div>
-                        <div class="quality-option" data-quality="medium">标清</div>
-                        <div class="quality-option" data-quality="low">流畅</div>
+        </div>
+    </div>
+
+    <!-- 主内容界面 -->
+    <div class="main-container" id="mainContainer">
+        <header>
+            <h1>20251109主崇</h1>
+            <div class="date">2025年11月9日</div>
+        </header>
+
+        <main>
+            <h2 class="section-title">
+                <i class="fas fa-music"></i> 诗歌敬拜
+            </h2>
+            <div class="hymns-container">
+                <!-- 第一首诗歌 -->
+                <div class="hymn-card">
+                    <div class="hymn-img-container">
+                        <img src="https://adjesus2520-my.sharepoint.com/personal/5_adjesus2520_onmicrosoft_com/_layouts/15/onedrive.aspx?viewid=b9c404ba%2D3474%2D4271%2Da389%2Dcea834ebf558&ga=1&id=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic%2F1%2Epng&parent=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic" alt="第一首诗歌乐谱" class="hymn-img">
+                    </div>
+                    <div class="hymn-info">
+                        <h3 class="hymn-title">
+                            <i class="fas fa-file-alt"></i> 第一首诗歌
+                        </h3>
+                        <audio controls class="audio-player">
+                            <source src="https://adjesus2520-my.sharepoint.com/personal/5_adjesus2520_onmicrosoft_com/_layouts/15/stream.aspx?id=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic%2F1%2Emp3&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2Ef37ba3bd%2D37ab%2D44b4%2D874d%2Dd8a29f6f92c" type="audio/mpeg">
+                            您的浏览器不支持音频播放
+                        </audio>
                     </div>
                 </div>
-                
-                <button class="control-btn" id="fullscreenBtn">⛶</button>
-            </div>
-        </div>
-        
-        <div class="player-info">
-            <h2>直播信息</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <div class="info-label">直播源</div>
-                    <div class="info-value">HLS 直播流</div>
+
+                <!-- 第二首诗歌 -->
+                <div class="hymn-card">
+                    <div class="hymn-img-container">
+                        <img src="https://adjesus2520-my.sharepoint.com/personal/5_adjesus2520_onmicrosoft_com/_layouts/15/onedrive.aspx?viewid=b9c404ba%2D3474%2D4271%2Da389%2Dcea834ebf558&ga=1&id=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic%2F2%2Epng&parent=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic" alt="第二首诗歌乐谱" class="hymn-img">
+                    </div>
+                    <div class="hymn-info">
+                        <h3 class="hymn-title">
+                            <i class="fas fa-file-alt"></i> 第二首诗歌
+                        </h3>
+                        <audio controls class="audio-player">
+                            <source src="https://adjesus2520-my.sharepoint.com/personal/5_adjesus2520_onmicrosoft_com/_layouts/15/stream.aspx?id=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic%2F2%2Emp3&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E528fab9d%2D023f%2D4916%2D8200%2D0450817f16e4" type="audio/mpeg">
+                            您的浏览器不支持音频播放
+                        </audio>
+                    </div>
                 </div>
-                <div class="info-item">
-                    <div class="info-label">播放地址</div>
-                    <div class="info-value">http://218.71.2.58:9011/hls/test.m3u8</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">播放状态</div>
-                    <div class="info-value" id="playStatus">准备播放</div>
-                </div>
-                <div class="info-item">
-                    <div class="info-label">缓冲状态</div>
-                    <div class="info-value" id="bufferStatus">--</div>
-                </div>
-            </div>
-            
-            <div class="network-stats">
-                <div class="stat-card">
-                    <div class="stat-label">下载速度</div>
-                    <div class="stat-value" id="downloadSpeed">-- Mbps</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">上传速度</div>
-                    <div class="stat-value" id="uploadSpeed">-- Mbps</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">网络延迟</div>
-                    <div class="stat-value" id="networkLatency">-- ms</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">实时码率</div>
-                    <div class="stat-value" id="bitrate">-- kbps</div>
+
+                <!-- 第三首诗歌 -->
+                <div class="hymn-card">
+                    <div class="hymn-img-container">
+                        <img src="https://adjesus2520-my.sharepoint.com/personal/5_adjesus2520_onmicrosoft_com/_layouts/15/onedrive.aspx?viewid=b9c404ba%2D3474%2D4271%2Da389%2Dcea834ebf558&ga=1&id=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic%2F3%2Epng&parent=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic" alt="第三首诗歌乐谱" class="hymn-img">
+                    </div>
+                    <div class="hymn-info">
+                        <h3 class="hymn-title">
+                            <i class="fas fa-file-alt"></i> 第三首诗歌
+                        </h3>
+                        <audio controls class="audio-player">
+                            <source src="https://adjesus2520-my.sharepoint.com/personal/5_adjesus2520_onmicrosoft_com/_layouts/15/stream.aspx?id=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic%2F3%2Emp3&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E04dbbf03%2D3fef%2D49b1%2Dbb4e%2Deeeaf055c8e1" type="audio/mpeg">
+                            您的浏览器不支持音频播放
+                        </audio>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="status" id="connectionStatus">
-            <span class="loading-spinner"></span>正在连接直播流...
-        </div>
+
+            <h2 class="section-title">
+                <i class="fas fa-video"></i> 证道分享
+            </h2>
+            <div class="video-section">
+                <div class="video-container">
+                    <video controls class="video-player">
+                        <source src="https://adjesus2520-my.sharepoint.com/personal/5_adjesus2520_onmicrosoft_com/_layouts/15/stream.aspx?id=%2Fpersonal%2F5%5Fadjesus2520%5Fonmicrosoft%5Fcom%2FDocuments%2F%E8%B5%84%E6%96%99%E4%B8%8A%E4%BC%A0%E5%8C%BA%2F%E6%AD%8C%E8%B0%B1%2F%E9%A2%82%E4%B8%BB%E5%9C%A3%E6%AD%8C%E3%80%94%E8%8B%97%E6%96%87%E5%9B%9B%E5%A3%B0%E9%83%A8%E3%80%95%2F%E6%AD%8C%E8%B0%B1%2F%E6%99%B6%2Fmusic%2F4%2Emp4&referrer=StreamWebApp%2EWeb&referrerScenario=AddressBarCopied%2Eview%2E70f885de%2D7d8a%2D4ff5%2D9c30%2Db9ee1cc7fd5d" type="video/mp4">
+                        您的浏览器不支持视频播放
+                    </video>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <div class="footer-content">
+                <p><i class="fas fa-pray"></i> 愿主的恩惠常与你们同在</p>
+                <p><i class="fas fa-heart"></i> 以马内利</p>
+                <div class="copyright">
+                    &copy; 2025 主崇敬拜 - 愿主赐福
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <div class="back-btn" id="backBtn" title="返回顶部">
+        <i class="fas fa-arrow-up"></i>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const video = document.getElementById('videoPlayer');
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const progressBar = document.getElementById('progressBar');
-            const progressContainer = document.getElementById('progressContainer');
-            const timeDisplay = document.getElementById('timeDisplay');
-            const muteBtn = document.getElementById('muteBtn');
-            const volumeSlider = document.getElementById('volumeSlider');
-            const fullscreenBtn = document.getElementById('fullscreenBtn');
-            const playStatus = document.getElementById('playStatus');
-            const bufferStatus = document.getElementById('bufferStatus');
-            const connectionStatus = document.getElementById('connectionStatus');
-            const qualityBtn = document.getElementById('qualityBtn');
-            const qualityMenu = document.getElementById('qualityMenu');
+            const passwordContainer = document.getElementById('passwordContainer');
+            const mainContainer = document.getElementById('mainContainer');
+            const passwordInput = document.getElementById('passwordInput');
+            const passwordBtn = document.getElementById('passwordBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const backBtn = document.getElementById('backBtn');
             
-            // 网络状态元素
-            const downloadSpeed = document.getElementById('downloadSpeed');
-            const uploadSpeed = document.getElementById('uploadSpeed');
-            const networkLatency = document.getElementById('networkLatency');
-            const bitrate = document.getElementById('bitrate');
+            // 设置正确密码
+            const correctPassword = '456258';
             
-            let hls;
-            let isLive = true; // 直播流没有固定时长
-            let downloadStats = {
-                bytesReceived: 0,
-                lastBytesReceived: 0,
-                lastTime: Date.now()
-            };
-            
-            // 初始化HLS播放器
-            function initHLS() {
-                if (Hls.isSupported()) {
-                    hls = new Hls({
-                        enableWorker: false,
-                        lowLatencyMode: true,
-                        backBufferLength: 90
-                    });
+            // 密码验证函数
+            function checkPassword() {
+                if (passwordInput.value === correctPassword) {
+                    passwordContainer.style.display = 'none';
+                    mainContainer.style.display = 'block';
                     
-                    // 绑定HLS到video元素
-                    hls.loadSource('http://218.71.2.58:9011/hls/test.m3u8');
-                    hls.attachMedia(video);
-                    
-                    // HLS事件监听
-                    hls.on(Hls.Events.MANIFEST_PARSED, function() {
-                        console.log('直播流加载成功');
-                        connectionStatus.textContent = '✅ 直播流连接成功';
-                        connectionStatus.className = 'status success';
-                        playStatus.textContent = '已连接，准备播放';
-                        
-                        // 自动开始播放
-                        video.play().catch(e => {
-                            console.log('自动播放被阻止:', e);
-                            playStatus.textContent = '点击播放按钮开始';
-                        });
-                    });
-                    
-                    hls.on(Hls.Events.ERROR, function(event, data) {
-                        console.error('HLS错误:', data);
-                        if (data.fatal) {
-                            switch(data.type) {
-                                case Hls.ErrorTypes.NETWORK_ERROR:
-                                    connectionStatus.textContent = '❌ 网络错误: ' + data.details;
-                                    connectionStatus.className = 'status error';
-                                    break;
-                                case Hls.ErrorTypes.MEDIA_ERROR:
-                                    connectionStatus.textContent = '❌ 媒体错误: ' + data.details;
-                                    connectionStatus.className = 'status error';
-                                    break;
-                                default:
-                                    connectionStatus.textContent = '❌ 不可恢复的错误';
-                                    connectionStatus.className = 'status error';
-                                    hls.destroy();
-                                    break;
-                            }
-                        }
-                    });
-                    
-                    hls.on(Hls.Events.LEVEL_LOADED, function(event, data) {
-                        console.log('清晰度切换:', data);
-                    });
-                    
-                    hls.on(Hls.Events.FRAG_LOADED, function(event, data) {
-                        // 更新下载统计
-                        updateDownloadStats(data);
-                    });
-                    
-                    hls.on(Hls.Events.BUFFER_CREATED, function(event, data) {
-                        updateBufferStatus();
-                    });
-                    
-                } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                    // Safari原生支持HLS
-                    video.src = 'http://218.71.2.58:9011/hls/test.m3u8';
-                    video.addEventListener('loadedmetadata', function() {
-                        connectionStatus.textContent = '✅ 直播流连接成功';
-                        connectionStatus.className = 'status success';
-                        playStatus.textContent = '已连接，准备播放';
+                    // 添加滚动效果
+                    window.scrollTo({
+                        top: 0,
+                        behavior: 'smooth'
                     });
                 } else {
-                    connectionStatus.textContent = '❌ 您的浏览器不支持HLS直播流播放';
-                    connectionStatus.className = 'status error';
+                    errorMessage.style.display = 'block';
+                    passwordInput.value = '';
+                    passwordInput.focus();
+                    
+                    // 添加错误动画
+                    passwordInput.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        passwordInput.style.animation = '';
+                    }, 500);
                 }
             }
             
-            // 更新下载统计信息
-            function updateDownloadStats(data) {
-                const now = Date.now();
-                const timeDiff = (now - downloadStats.lastTime) / 1000; // 转换为秒
-                
-                if (timeDiff >= 1) { // 每秒更新一次
-                    const bytesDiff = data.stats.total ? data.stats.total - downloadStats.lastBytesReceived : 0;
-                    const speed = (bytesDiff * 8) / (timeDiff * 1000000); // 转换为Mbps
-                    
-                    downloadSpeed.textContent = speed.toFixed(2) + ' Mbps';
-                    
-                    downloadStats.lastBytesReceived = data.stats.total || 0;
-                    downloadStats.lastTime = now;
+            // 添加抖动动画
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+                    20%, 40%, 60%, 80% { transform: translateX(5px); }
                 }
-                
-                // 更新码率信息
-                if (hls.levels && hls.currentLevel !== -1) {
-                    const currentLevel = hls.levels[hls.currentLevel];
-                    if (currentLevel && currentLevel.bitrate) {
-                        bitrate.textContent = Math.round(currentLevel.bitrate / 1000) + ' kbps';
-                    }
-                }
-            }
+            `;
+            document.head.appendChild(style);
             
-            // 模拟网络测速（实际应用中应该使用真实测速API）
-            function simulateNetworkSpeed() {
-                // 模拟下载速度 (5-50 Mbps)
-                const simulatedDownload = (Math.random() * 45 + 5).toFixed(2);
-                downloadSpeed.textContent = simulatedDownload + ' Mbps';
-                
-                // 模拟上传速度 (1-20 Mbps)
-                const simulatedUpload = (Math.random() * 19 + 1).toFixed(2);
-                uploadSpeed.textContent = simulatedUpload + ' Mbps';
-                
-                // 模拟网络延迟 (10-100 ms)
-                const simulatedLatency = Math.floor(Math.random() * 90 + 10);
-                networkLatency.textContent = simulatedLatency + ' ms';
-            }
+            // 绑定按钮点击事件
+            passwordBtn.addEventListener('click', checkPassword);
             
-            // 播放/暂停控制
-            playPauseBtn.addEventListener('click', function() {
-                if (video.paused) {
-                    video.play();
-                    playPauseBtn.textContent = '⏸️';
-                    playStatus.textContent = '播放中';
-                } else {
-                    video.pause();
-                    playPauseBtn.textContent = '▶️';
-                    playStatus.textContent = '已暂停';
+            // 绑定回车键事件
+            passwordInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    checkPassword();
                 }
             });
             
-            // 更新进度条 (直播流特殊处理)
-            video.addEventListener('timeupdate', function() {
-                if (isLive) {
-                    // 直播流显示当前时间
-                    const currentTime = formatTime(video.currentTime);
-                    timeDisplay.textContent = currentTime;
-                    
-                    // 直播流进度条特殊处理
-                    if (video.duration && video.duration !== Infinity) {
-                        const progress = (video.currentTime / video.duration) * 100;
-                        progressBar.style.width = `${progress}%`;
-                    } else {
-                        // 对于无限直播流，进度条保持满状态
-                        progressBar.style.width = `100%`;
-                    }
-                } else {
-                    // 点播视频处理
-                    const progress = (video.currentTime / video.duration) * 100;
-                    progressBar.style.width = `${progress}%`;
-                    
-                    const currentTime = formatTime(video.currentTime);
-                    const duration = formatTime(video.duration);
-                    timeDisplay.textContent = `${currentTime} / ${duration}`;
-                }
-            });
-            
-            // 点击进度条跳转 (直播流禁用)
-            progressContainer.addEventListener('click', function(e) {
-                if (!isLive) {
-                    const rect = progressContainer.getBoundingClientRect();
-                    const pos = (e.clientX - rect.left) / rect.width;
-                    video.currentTime = pos * video.duration;
-                }
-            });
-            
-            // 音量控制
-            volumeSlider.addEventListener('input', function() {
-                video.volume = volumeSlider.value;
-                updateVolumeIcon();
-            });
-            
-            muteBtn.addEventListener('click', function() {
-                video.muted = !video.muted;
-                updateVolumeIcon();
-            });
-            
-            function updateVolumeIcon() {
-                if (video.muted || video.volume === 0) {
-                    muteBtn.textContent = '🔇';
-                } else if (video.volume < 0.5) {
-                    muteBtn.textContent = '🔈';
-                } else {
-                    muteBtn.textContent = '🔊';
-                }
-                volumeSlider.value = video.muted ? 0 : video.volume;
-            }
-            
-            // 全屏控制
-            fullscreenBtn.addEventListener('click', function() {
-                if (!document.fullscreenElement) {
-                    video.requestFullscreen().catch(err => {
-                        console.error(`全屏请求错误: ${err.message}`);
-                    });
-                } else {
-                    document.exitFullscreen();
-                }
-            });
-            
-            // 画质选择
-            qualityBtn.addEventListener('click', function() {
-                qualityMenu.classList.toggle('show');
-            });
-            
-            // 关闭画质菜单当点击其他地方时
-            document.addEventListener('click', function(e) {
-                if (!qualityBtn.contains(e.target) && !qualityMenu.contains(e.target)) {
-                    qualityMenu.classList.remove('show');
-                }
-            });
-            
-            // 画质选项点击事件
-            document.querySelectorAll('.quality-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    const quality = this.getAttribute('data-quality');
-                    // 在实际应用中，这里应该切换不同的HLS级别
-                    console.log('切换到画质:', quality);
-                    qualityBtn.textContent = `画质: ${this.textContent}`;
-                    qualityMenu.classList.remove('show');
+            // 返回顶部功能
+            backBtn.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
                 });
             });
             
-            // 格式化时间显示
-            function formatTime(seconds) {
-                const hrs = Math.floor(seconds / 3600);
-                const mins = Math.floor((seconds % 3600) / 60);
-                const secs = Math.floor(seconds % 60);
-                return `${hrs.toString().padStart(2, '0')}:${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-            }
-            
-            // 更新缓冲状态
-            function updateBufferStatus() {
-                if (video.buffered && video.buffered.length > 0) {
-                    const bufferedEnd = video.buffered.end(video.buffered.length - 1);
-                    const bufferPercentage = (bufferedEnd / video.duration) * 100;
-                    bufferStatus.textContent = `${Math.round(bufferPercentage)}% 已缓冲`;
+            // 显示/隐藏返回顶部按钮
+            window.addEventListener('scroll', function() {
+                if (window.pageYOffset > 300) {
+                    backBtn.style.display = 'flex';
                 } else {
-                    bufferStatus.textContent = '0% 已缓冲';
-                }
-            }
-            
-            // 视频事件监听
-            video.addEventListener('waiting', function() {
-                playStatus.textContent = '缓冲中...';
-            });
-            
-            video.addEventListener('playing', function() {
-                playStatus.textContent = '播放中';
-            });
-            
-            video.addEventListener('ended', function() {
-                playPauseBtn.textContent = '▶️';
-                playStatus.textContent = '播放结束';
-            });
-            
-            // 检测是否为直播流
-            video.addEventListener('loadedmetadata', function() {
-                isLive = !isFinite(video.duration);
-                console.log('是否为直播流:', isLive);
-                
-                if (isLive) {
-                    timeDisplay.textContent = '直播';
-                    progressBar.style.width = '100%';
+                    backBtn.style.display = 'none';
                 }
             });
             
-            // 初始化HLS播放器
-            initHLS();
-            
-            // 开始模拟网络测速
-            setInterval(simulateNetworkSpeed, 2000);
+            // 页面加载后聚焦到密码输入框
+            passwordInput.focus();
         });
     </script>
 </body>
