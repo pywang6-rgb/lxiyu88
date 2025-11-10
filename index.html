@@ -3,621 +3,588 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>诗歌欣赏 - 在线播放</title>
+    <title>电影下载器 - 实时速度监控</title>
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         
         body {
-            font-family: 'Microsoft YaHei', 'SimSun', serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
             min-height: 100vh;
             padding: 20px;
-            color: #333;
-        }
-        
-        /* 密码保护层 */
-        .password-protection {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-        }
-        
-        .password-box {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            text-align: center;
-            max-width: 400px;
-            width: 90%;
-        }
-        
-        .password-box h2 {
-            color: #4CAF50;
-            margin-bottom: 20px;
-        }
-        
-        .password-input {
-            width: 100%;
-            padding: 12px;
-            margin: 15px 0;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-size: 16px;
-            text-align: center;
-        }
-        
-        .password-input:focus {
-            border-color: #4CAF50;
-            outline: none;
-        }
-        
-        .password-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 30px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-        }
-        
-        .password-btn:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-        }
-        
-        .error-message {
-            color: #f44336;
-            margin-top: 10px;
-            display: none;
         }
         
         .container {
-            max-width: 900px;
+            max-width: 1200px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-            overflow: hidden;
-            display: none;
         }
         
-        .header {
-            background: linear-gradient(45deg, #4CAF50, #45a049);
-            color: white;
-            padding: 30px;
+        header {
             text-align: center;
+            margin-bottom: 40px;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
         }
         
-        .header h1 {
-            font-size: 2.5em;
+        h1 {
+            font-size: 2.8rem;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
         
-        .header p {
-            font-size: 1.2em;
+        .subtitle {
+            font-size: 1.2rem;
             opacity: 0.9;
         }
         
-        .content {
-            padding: 30px;
-        }
-        
-        .section {
-            margin-bottom: 40px;
-        }
-        
-        .section h2 {
-            color: #4CAF50;
-            margin-bottom: 20px;
-            font-size: 1.8em;
-            text-align: center;
-        }
-        
-        .sheet-music-container {
-            display: inline-block;
-            border: 3px solid #4CAF50;
-            border-radius: 10px;
-            padding: 10px;
-            background: #f9f9f9;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            max-width: 100%;
-            text-align: center;
-        }
-        
-        .sheet-music-container img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: transform 0.3s ease;
-        }
-        
-        .sheet-music-container img:hover {
-            transform: scale(1.02);
-        }
-        
-        .player-section {
-            background: #f5f5f5;
-            padding: 25px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        
-        audio, video {
-            width: 100%;
-            max-width: 600px;
-            margin: 15px 0;
-            border-radius: 10px;
-        }
-        
-        .controls {
-            margin: 20px 0;
-        }
-        
-        .control-btn {
-            background: #4CAF50;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            margin: 0 8px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .control-btn:hover {
-            background: #45a049;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-        
-        .control-btn:active {
-            transform: translateY(0);
-        }
-        
-        .volume-control {
-            margin: 15px 0;
-        }
-        
-        .volume-control label {
-            font-weight: bold;
-            margin-right: 10px;
-        }
-        
-        .volume-slider {
-            width: 200px;
-            height: 8px;
-            border-radius: 4px;
-            background: #ddd;
-            outline: none;
-        }
-        
-        .status {
-            margin: 15px 0;
-            padding: 10px;
-            background: #e8f5e8;
-            border-radius: 5px;
-            display: none;
-        }
-        
-        .status.success {
-            background: #e8f5e8;
-            color: #2e7d32;
-            display: block;
-        }
-        
-        .status.error {
-            background: #ffebee;
-            color: #c62828;
-            display: block;
-        }
-        
-        .instructions {
-            margin-top: 25px;
-            padding: 15px;
-            background: #e8f5e8;
-            border-radius: 8px;
-            border-left: 4px solid #4CAF50;
-        }
-        
-        .instructions h3 {
-            color: #4CAF50;
-            margin-bottom: 10px;
-        }
-        
-        .instructions ul {
-            text-align: left;
-            margin-left: 20px;
-        }
-        
-        .instructions li {
-            margin: 8px 0;
-        }
-        
-        .footer {
-            text-align: center;
-            padding: 20px;
-            background: #f1f1f1;
-            color: #666;
-            font-size: 0.9em;
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
         }
         
         @media (max-width: 768px) {
-            .header h1 {
-                font-size: 2em;
-            }
-            
-            .content {
-                padding: 20px;
-            }
-            
-            .control-btn {
-                display: block;
-                width: 100%;
-                margin: 8px 0;
-            }
-            
-            .controls {
-                margin: 10px 0;
+            .main-content {
+                grid-template-columns: 1fr;
             }
         }
         
-        .fullscreen-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
+        .download-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .movie-info {
+            display: flex;
+            margin-bottom: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        
+        .movie-poster {
+            width: 140px;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .movie-details {
+            padding: 20px;
+            flex: 1;
+        }
+        
+        .movie-title {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .movie-meta {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .movie-description {
+            line-height: 1.5;
+            opacity: 0.9;
+        }
+        
+        .download-controls {
+            margin-top: 20px;
+        }
+        
+        .progress-container {
+            margin-bottom: 20px;
+        }
+        
+        .progress-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+        
+        .progress {
             height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            border-radius: 6px;
+            width: 0%;
+            transition: width 0.3s ease;
         }
         
-        .fullscreen-media {
-            max-width: 90%;
-            max-height: 90%;
+        .progress-info {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+        }
+        
+        .speed-display {
+            font-size: 1.5rem;
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
             border-radius: 10px;
         }
         
-        .close-btn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            color: white;
-            font-size: 30px;
-            cursor: pointer;
-            background: none;
+        .speed-value {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #00c6ff;
+            margin: 0 5px;
+        }
+        
+        .controls {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
             border: none;
-            z-index: 1001;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn {
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            color: white;
+        }
+        
+        .pause-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .cancel-btn {
+            background: rgba(255, 50, 50, 0.7);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stats-panel {
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stats-title {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .speed-chart {
+            height: 200px;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            padding: 15px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin: 10px 0;
+            color: #00c6ff;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+            opacity: 0.7;
+        }
+        
+        .quality-selector {
+            display: flex;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .quality-btn {
+            padding: 8px 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .quality-btn.active {
+            background: #0072ff;
         }
     </style>
 </head>
 <body>
-    <div class="password-protection" id="passwordProtection">
-        <div class="password-box">
-            <h2>🔒 请输入访问密码</h2>
-            <input type="password" class="password-input" id="passwordInput" placeholder="请输入密码" onkeypress="handlePasswordKeypress(event)">
-            <button class="password-btn" onclick="checkPassword()">进入网站</button>
-            <div class="error-message" id="errorMessage">密码错误，请重新输入</div>
-        </div>
-    </div>
-
-    <div class="container" id="mainContainer">
-        <div class="header">
-            <h1>🎵 诗歌朗诵欣赏</h1>
-            <p>聆听诗意，品味经典 - 腾讯云高速访问</p>
-        </div>
+    <div class="container">
+        <header>
+            <h1>电影下载器</h1>
+            <p class="subtitle">高速下载，实时监控下载速度</p>
+        </header>
         
-        <div class="content">
-            <div id="status" class="status"></div>
-            
-            <div class="section">
-                <h2>🎼 诗歌歌谱</h2>
-                <div class="sheet-music-container">
-                    <img src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/sheet-music.png" 
-                         alt="诗歌歌谱" 
-                         id="sheetMusic"
-                         onerror="handleImageError()">
-                </div>
-                <p style="margin-top: 10px; color: #666; text-align: center;">点击图片可以全屏查看</p>
-            </div>
-            
-            <div class="section player-section">
-                <h2>🎤 诗歌朗诵</h2>
-                <audio id="musicPlayer" controls>
-                    <source src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/song.mp3" type="audio/mpeg">
-                    您的浏览器不支持音频播放，请使用现代浏览器访问。
-                </audio>
-                
-                <div class="controls">
-                    <button class="control-btn" onclick="playMusic()">▶️ 播放</button>
-                    <button class="control-btn" onclick="pauseMusic()">⏸️ 暂停</button>
-                    <button class="control-btn" onclick="restartMusic()">⏮️ 重新开始</button>
-                    <button class="control-btn" onclick="toggleMute('music')">🔇 静音/取消</button>
+        <div class="main-content">
+            <div class="download-panel">
+                <div class="movie-info">
+                    <img src="https://via.placeholder.com/140x200/2c3e50/ffffff?text=Movie+Poster" alt="电影海报" class="movie-poster">
+                    <div class="movie-details">
+                        <h2 class="movie-title">星际穿越</h2>
+                        <div class="movie-meta">
+                            <span>科幻</span>
+                            <span>2014</span>
+                            <span>2小时49分钟</span>
+                            <span>8.6/10</span>
+                        </div>
+                        <p class="movie-description">一群探险家利用他们针对虫洞的新发现，超越人类对于太空旅行的极限，从而开始在广袤的宇宙中进行星际航行。</p>
+                    </div>
                 </div>
                 
-                <div class="volume-control">
-                    <label for="musicVolumeSlider">音量调节：</label>
-                    <input type="range" id="musicVolumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="1">
-                </div>
-            </div>
-            
-            <div class="section player-section">
-                <h2>🎬 视频欣赏</h2>
-                <video id="videoPlayer" controls poster="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Crect width='600' height='400' fill='%23f0f0f0'/%3E%3Ctext x='300' y='200' font-family='Arial' font-size='24' fill='%23999' text-anchor='middle'%3E视频加载中...%3C/text%3E%3C/svg%3E">
-                    <source src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/%E7%9C%8B%E4%B8%8D%E8%A7%81%E7%9A%84.mp4" type="video/mp4">
-                    您的浏览器不支持视频播放，请使用现代浏览器访问。
-                </video>
-                
-                <div class="controls">
-                    <button class="control-btn" onclick="playVideo()">▶️ 播放视频</button>
-                    <button class="control-btn" onclick="pauseVideo()">⏸️ 暂停视频</button>
-                    <button class="control-btn" onclick="restartVideo()">⏮️ 重新开始</button>
-                    <button class="control-btn" onclick="toggleMute('video')">🔇 静音/取消</button>
-                    <button class="control-btn" onclick="fullscreenVideo()">📺 全屏观看</button>
+                <div class="quality-selector">
+                    <div class="quality-btn active">1080p</div>
+                    <div class="quality-btn">720p</div>
+                    <div class="quality-btn">480p</div>
                 </div>
                 
-                <div class="volume-control">
-                    <label for="videoVolumeSlider">音量调节：</label>
-                    <input type="range" id="videoVolumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="1">
+                <div class="download-controls">
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress" id="progress"></div>
+                        </div>
+                        <div class="progress-info">
+                            <span>已下载: <span id="downloaded">0 MB</span></span>
+                            <span>剩余: <span id="remaining">2.1 GB</span></span>
+                        </div>
+                    </div>
+                    
+                    <div class="speed-display">
+                        当前速度: <span class="speed-value" id="current-speed">0</span> MB/s
+                    </div>
+                    
+                    <div class="controls">
+                        <button class="download-btn" id="download-btn">开始下载</button>
+                        <button class="pause-btn" id="pause-btn" disabled>暂停</button>
+                        <button class="cancel-btn" id="cancel-btn">取消</button>
+                    </div>
                 </div>
             </div>
             
-            <div class="instructions">
-                <h3>📋 使用说明</h3>
-                <ul>
-                    <li>点击歌谱图片可以全屏查看细节</li>
-                    <li>使用播放器控制按钮或浏览器原生控件来播放音频和视频</li>
-                    <li>可以调节音量大小获得最佳收听体验</li>
-                    <li>支持键盘快捷键：空格键播放/暂停，R键重新开始，M键静音</li>
-                    <li>文件通过腾讯云COS托管，国内访问速度快</li>
-                </ul>
+            <div class="stats-panel">
+                <h3 class="stats-title">下载统计</h3>
+                
+                <div class="speed-chart" id="speed-chart">
+                    <!-- 速度图表将通过JavaScript绘制 -->
+                </div>
+                
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">平均速度</div>
+                        <div class="stat-value" id="avg-speed">0 MB/s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">峰值速度</div>
+                        <div class="stat-value" id="peak-speed">0 MB/s</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">已用时间</div>
+                        <div class="stat-value" id="elapsed-time">0:00</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">剩余时间</div>
+                        <div class="stat-value" id="eta">--:--</div>
+                    </div>
+                </div>
             </div>
         </div>
         
-        <div class="footer">
-            <p>© 2024 诗歌欣赏 | 腾讯云COS高速托管 | 通过 GitHub Pages 部署</p>
-        </div>
-    </div>
-
-    <div class="fullscreen-overlay" id="fullscreenOverlay">
-        <button class="close-btn" onclick="closeFullscreen()">×</button>
-        <img src="https://abc-1301182289.cos.ap-shanghai.myqcloud.com/sheet-music.png" 
-             alt="诗歌歌谱全屏查看" 
-             class="fullscreen-media"
-             id="fullscreenImage">
+        <footer>
+            <p>注意：本页面仅为演示用途，不提供实际电影下载功能</p>
+        </footer>
     </div>
 
     <script>
-        const CORRECT_PASSWORD = "123456";
-        
-        function checkPassword() {
-            const input = document.getElementById('passwordInput');
-            const errorMessage = document.getElementById('errorMessage');
+        // 模拟下载状态和数据
+        let downloadState = {
+            isDownloading: false,
+            isPaused: false,
+            progress: 0,
+            downloaded: 0, // MB
+            totalSize: 2100, // MB (2.1 GB)
+            startTime: null,
+            speeds: [],
+            speedChartData: [],
+            intervalId: null
+        };
+
+        // DOM 元素
+        const progressBar = document.getElementById('progress');
+        const downloadedEl = document.getElementById('downloaded');
+        const remainingEl = document.getElementById('remaining');
+        const currentSpeedEl = document.getElementById('current-speed');
+        const avgSpeedEl = document.getElementById('avg-speed');
+        const peakSpeedEl = document.getElementById('peak-speed');
+        const elapsedTimeEl = document.getElementById('elapsed-time');
+        const etaEl = document.getElementById('eta');
+        const downloadBtn = document.getElementById('download-btn');
+        const pauseBtn = document.getElementById('pause-btn');
+        const cancelBtn = document.getElementById('cancel-btn');
+        const speedChart = document.getElementById('speed-chart');
+
+        // 初始化
+        function init() {
+            updateDisplay();
+            setupChart();
             
-            if (input.value === CORRECT_PASSWORD) {
-                document.getElementById('passwordProtection').style.display = 'none';
-                document.getElementById('mainContainer').style.display = 'block';
-                setTimeout(checkResources, 100);
+            // 事件监听
+            downloadBtn.addEventListener('click', toggleDownload);
+            pauseBtn.addEventListener('click', togglePause);
+            cancelBtn.addEventListener('click', cancelDownload);
+            
+            // 模拟初始速度数据
+            for (let i = 0; i < 20; i++) {
+                downloadState.speedChartData.push(0);
+            }
+        }
+
+        // 设置速度图表
+        function setupChart() {
+            // 创建一个简单的SVG图表
+            speedChart.innerHTML = '<svg width="100%" height="100%" viewBox="0 0 400 200" preserveAspectRatio="none"></svg>';
+        }
+
+        // 更新速度图表
+        function updateChart() {
+            const svg = speedChart.querySelector('svg');
+            const data = downloadState.speedChartData;
+            const maxSpeed = Math.max(...data, 10); // 确保图表有适当的高度
+            
+            // 创建折线路径
+            let pathData = '';
+            for (let i = 0; i < data.length; i++) {
+                const x = (i / (data.length - 1)) * 400;
+                const y = 200 - (data[i] / maxSpeed) * 180; // 留出一些边距
+                
+                if (i === 0) {
+                    pathData += `M ${x},${y} `;
+                } else {
+                    pathData += `L ${x},${y} `;
+                }
+            }
+            
+            // 创建填充区域
+            let areaData = pathData + `L 400,200 L 0,200 Z`;
+            
+            // 清除之前的图表
+            svg.innerHTML = '';
+            
+            // 添加填充区域
+            const area = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            area.setAttribute('d', areaData);
+            area.setAttribute('fill', 'rgba(0, 198, 255, 0.2)');
+            area.setAttribute('stroke', 'none');
+            svg.appendChild(area);
+            
+            // 添加折线
+            const line = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            line.setAttribute('d', pathData);
+            line.setAttribute('fill', 'none');
+            line.setAttribute('stroke', '#00c6ff');
+            line.setAttribute('stroke-width', '2');
+            svg.appendChild(line);
+            
+            // 添加网格线
+            for (let i = 0; i <= 4; i++) {
+                const y = 200 - (i * 40);
+                const gridLine = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                gridLine.setAttribute('x1', '0');
+                gridLine.setAttribute('y1', y);
+                gridLine.setAttribute('x2', '400');
+                gridLine.setAttribute('y2', y);
+                gridLine.setAttribute('stroke', 'rgba(255, 255, 255, 0.1)');
+                gridLine.setAttribute('stroke-width', '1');
+                svg.appendChild(gridLine);
+            }
+        }
+
+        // 切换下载状态
+        function toggleDownload() {
+            if (downloadState.isDownloading) {
+                pauseDownload();
             } else {
-                errorMessage.style.display = 'block';
-                input.value = '';
-                input.focus();
+                startDownload();
             }
-        }
-        
-        function handlePasswordKeypress(event) {
-            if (event.key === 'Enter') {
-                checkPassword();
-            }
-        }
-        
-        window.addEventListener('load', function() {
-            document.getElementById('passwordInput').focus();
-        });
-
-        const musicPlayer = document.getElementById('musicPlayer');
-        const videoPlayer = document.getElementById('videoPlayer');
-        const musicVolumeSlider = document.getElementById('musicVolumeSlider');
-        const videoVolumeSlider = document.getElementById('videoVolumeSlider');
-        const sheetMusic = document.getElementById('sheetMusic');
-        const fullscreenOverlay = document.getElementById('fullscreenOverlay');
-        const fullscreenImage = document.getElementById('fullscreenImage');
-        const statusDiv = document.getElementById('status');
-
-        function showStatus(message, type) {
-            statusDiv.textContent = message;
-            statusDiv.className = 'status ' + type;
         }
 
-        function checkResources() {
-            showStatus('正在检查资源可用性...', '');
+        // 开始下载
+        function startDownload() {
+            if (downloadState.progress >= 100) return;
             
-            const img = new Image();
-            img.onload = function() {
-                showStatus('✅ 所有资源加载成功！现在可以正常使用', 'success');
-            };
-            img.onerror = function() {
-                showStatus('❌ 歌谱图片加载失败，请检查文件链接', 'error');
-            };
-            img.src = 'https://abc-1301182289.cos.ap-shanghai.myqcloud.com/sheet-music.png';
+            downloadState.isDownloading = true;
+            downloadState.isPaused = false;
+            downloadState.startTime = new Date();
             
-            musicPlayer.addEventListener('canplaythrough', function() {
-                showStatus('✅ 所有资源加载成功！现在可以正常使用', 'success');
-            });
+            downloadBtn.textContent = '暂停下载';
+            pauseBtn.disabled = false;
             
-            musicPlayer.addEventListener('error', function() {
-                showStatus('❌ 音频文件加载失败，请检查文件链接', 'error');
-            });
-            
-            videoPlayer.addEventListener('canplaythrough', function() {
-                console.log('视频加载完成');
-            });
-            
-            videoPlayer.addEventListener('error', function() {
-                console.log('视频加载失败');
-            });
-            
-            musicPlayer.load();
-            videoPlayer.load();
+            // 模拟下载过程
+            downloadState.intervalId = setInterval(updateDownload, 100);
         }
 
-        function playMusic() {
-            musicPlayer.play().catch(e => {
-                console.log("音频播放失败:", e);
-                showStatus('❌ 音频播放失败，请检查音频文件', 'error');
-            });
+        // 暂停下载
+        function pauseDownload() {
+            downloadState.isDownloading = false;
+            downloadState.isPaused = true;
+            
+            downloadBtn.textContent = '继续下载';
+            pauseBtn.disabled = true;
+            
+            clearInterval(downloadState.intervalId);
         }
-        
-        function pauseMusic() {
-            musicPlayer.pause();
-        }
-        
-        function restartMusic() {
-            musicPlayer.currentTime = 0;
-            playMusic();
-        }
-        
-        function playVideo() {
-            videoPlayer.play().catch(e => {
-                console.log("视频播放失败:", e);
-                showStatus('❌ 视频播放失败，请检查视频文件', 'error');
-            });
-        }
-        
-        function pauseVideo() {
-            videoPlayer.pause();
-        }
-        
-        function restartVideo() {
-            videoPlayer.currentTime = 0;
-            playVideo();
-        }
-        
-        function fullscreenVideo() {
-            if (videoPlayer.requestFullscreen) {
-                videoPlayer.requestFullscreen();
-            } else if (videoPlayer.webkitRequestFullscreen) {
-                videoPlayer.webkitRequestFullscreen();
-            } else if (videoPlayer.mozRequestFullScreen) {
-                videoPlayer.mozRequestFullScreen();
+
+        // 切换暂停状态
+        function togglePause() {
+            if (downloadState.isPaused) {
+                startDownload();
+            } else {
+                pauseDownload();
             }
         }
-        
-        function toggleMute(type) {
-            if (type === 'music') {
-                musicPlayer.muted = !musicPlayer.muted;
-                const muteBtn = document.querySelector('.player-section:nth-child(2) .control-btn:nth-child(4)');
-                muteBtn.textContent = musicPlayer.muted ? '🔊 取消静音' : '🔇 静音';
-            } else if (type === 'video') {
-                videoPlayer.muted = !videoPlayer.muted;
-                const muteBtn = document.querySelector('.player-section:nth-child(3) .control-btn:nth-child(4)');
-                muteBtn.textContent = videoPlayer.muted ? '🔊 取消静音' : '🔇 静音';
-            }
+
+        // 取消下载
+        function cancelDownload() {
+            downloadState.isDownloading = false;
+            downloadState.isPaused = false;
+            downloadState.progress = 0;
+            downloadState.downloaded = 0;
+            downloadState.speeds = [];
+            downloadState.speedChartData = new Array(20).fill(0);
+            
+            downloadBtn.textContent = '开始下载';
+            pauseBtn.disabled = true;
+            
+            clearInterval(downloadState.intervalId);
+            updateDisplay();
+            updateChart();
         }
-        
-        musicVolumeSlider.addEventListener('input', function() {
-            musicPlayer.volume = this.value;
-        });
-        
-        videoVolumeSlider.addEventListener('input', function() {
-            videoPlayer.volume = this.value;
-        });
-        
-        musicPlayer.volume = musicVolumeSlider.value;
-        videoPlayer.volume = videoVolumeSlider.value;
-        
-        sheetMusic.addEventListener('click', function() {
-            fullscreenOverlay.style.display = 'flex';
-            document.body.style.overflow = 'hidden';
-        });
-        
-        function closeFullscreen() {
-            fullscreenOverlay.style.display = 'none';
-            document.body.style.overflow = 'auto';
-        }
-        
-        fullscreenOverlay.addEventListener('click', function(e) {
-            if (e.target === fullscreenOverlay) {
-                closeFullscreen();
-            }
-        });
-        
-        function handleImageError() {
-            showStatus('❌ 歌谱图片加载失败，请检查文件链接或图片格式', 'error');
-        }
-        
-        musicPlayer.addEventListener('loadeddata', function() {
-            console.log('音频加载完成，时长:', musicPlayer.duration + '秒');
-        });
-        
-        videoPlayer.addEventListener('loadeddata', function() {
-            console.log('视频加载完成，时长:', videoPlayer.duration + '秒');
-        });
-        
-        musicPlayer.addEventListener('ended', function() {
-            console.log('诗歌播放结束');
-            showStatus('🎵 诗歌播放完毕', 'success');
-        });
-        
-        videoPlayer.addEventListener('ended', function() {
-            console.log('视频播放结束');
-            showStatus('🎬 视频播放完毕', 'success');
-        });
-        
-        document.addEventListener('keydown', function(e) {
-            if (document.getElementById('passwordProtection').style.display !== 'none') {
-                return;
+
+        // 更新下载进度
+        function updateDownload() {
+            if (!downloadState.isDownloading) return;
+            
+            // 模拟下载速度波动
+            const baseSpeed = 5; // MB/s
+            const variation = Math.random() * 3; // 随机变化
+            const currentSpeed = baseSpeed + variation;
+            
+            // 更新下载数据
+            downloadState.downloaded += currentSpeed / 10; // 每100ms下载的量
+            downloadState.progress = (downloadState.downloaded / downloadState.totalSize) * 100;
+            
+            // 记录速度
+            downloadState.speeds.push(currentSpeed);
+            downloadState.speedChartData.push(currentSpeed);
+            if (downloadState.speedChartData.length > 20) {
+                downloadState.speedChartData.shift();
             }
             
-            const activeElement = document.activeElement;
-            if (activeElement.tagName === 'INPUT' || activeElement.tagName === 'TEXTAREA') {
-                return;
+            // 检查是否完成
+            if (downloadState.progress >= 100) {
+                downloadState.progress = 100;
+                downloadState.downloaded = downloadState.totalSize;
+                downloadState.isDownloading = false;
+                downloadBtn.textContent = '下载完成';
+                pauseBtn.disabled = true;
+                clearInterval(downloadState.intervalId);
             }
             
-            switch(e.key) {
-                case ' ':
-                    e.preventDefault();
-                    if (videoPlayer.paused) {
-                        playVideo();
-                    } else {
-                        pauseVideo();
-                    }
-                    break;
-                case 'r':
-                case 'R':
-                    e.preventDefault();
-                    restartVideo();
-                    break;
-                case 'm':
-                case 'M':
-                    e.preventDefault();
-                    toggleMute('video');
-                    break;
-                case 'Escape':
-                    closeFullscreen();
-                    break;
+            updateDisplay();
+            updateChart();
+        }
+
+        // 更新显示
+        function updateDisplay() {
+            // 更新进度条
+            progressBar.style.width = `${downloadState.progress}%`;
+            
+            // 更新下载量
+            downloadedEl.textContent = `${downloadState.downloaded.toFixed(1)} MB`;
+            remainingEl.textContent = `${(downloadState.totalSize - downloadState.downloaded).toFixed(1)} MB`;
+            
+            // 计算并显示速度
+            const currentSpeed = downloadState.speeds.length > 0 ? 
+                downloadState.speeds[downloadState.speeds.length - 1] : 0;
+            currentSpeedEl.textContent = currentSpeed.toFixed(1);
+            
+            // 计算平均速度
+            const avgSpeed = downloadState.speeds.length > 0 ? 
+                downloadState.speeds.reduce((a, b) => a + b, 0) / downloadState.speeds.length : 0;
+            avgSpeedEl.textContent = `${avgSpeed.toFixed(1)} MB/s`;
+            
+            // 计算峰值速度
+            const peakSpeed = downloadState.speeds.length > 0 ? 
+                Math.max(...downloadState.speeds) : 0;
+            peakSpeedEl.textContent = `${peakSpeed.toFixed(1)} MB/s`;
+            
+            // 计算时间
+            if (downloadState.startTime && downloadState.isDownloading) {
+                const now = new Date();
+                const elapsedSeconds = Math.floor((now - downloadState.startTime) / 1000);
+                const elapsedMinutes = Math.floor(elapsedSeconds / 60);
+                const elapsedSecondsRemainder = elapsedSeconds % 60;
+                elapsedTimeEl.textContent = `${elapsedMinutes}:${elapsedSecondsRemainder.toString().padStart(2, '0')}`;
+                
+                // 计算剩余时间
+                if (currentSpeed > 0) {
+                    const remainingMB = downloadState.totalSize - downloadState.downloaded;
+                    const remainingSeconds = Math.floor(remainingMB / currentSpeed);
+                    const remainingMinutes = Math.floor(remainingSeconds / 60);
+                    const remainingSecondsRemainder = remainingSeconds % 60;
+                    etaEl.textContent = `${remainingMinutes}:${remainingSecondsRemainder.toString().padStart(2, '0')}`;
+                }
             }
-        });
+        }
+
+        // 初始化
+        window.onload = init;
     </script>
 </body>
 </html>
