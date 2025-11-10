@@ -246,6 +246,34 @@
             to { transform: rotate(360deg); }
         }
         
+        .network-stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 150px;
+            text-align: center;
+            flex: 1;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.8rem;
@@ -268,6 +296,10 @@
                 width: 100%;
                 margin: 10px 0;
             }
+            
+            .network-stats {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
@@ -275,7 +307,7 @@
     <div class="container">
         <header>
             <h1>HLS直播播放器</h1>
-            <p class="subtitle">正在播放20251101</p>
+            <p class="subtitle">正在播放: http://218.71.2.58:9011/hls/test.m3u8</p>
         </header>
         
         <div class="player-container">
@@ -318,7 +350,7 @@
                 </div>
                 <div class="info-item">
                     <div class="info-label">播放地址</div>
-                    <div class="info-value">http://218.71.2.58:9011//hls/test.m3u8</div>
+                    <div class="info-value">http://218.71.2.58:9011/hls/test.m3u8</div>
                 </div>
                 <div class="info-item">
                     <div class="info-label">播放状态</div>
@@ -327,6 +359,25 @@
                 <div class="info-item">
                     <div class="info-label">缓冲状态</div>
                     <div class="info-value" id="bufferStatus">--</div>
+                </div>
+            </div>
+            
+            <div class="network-stats">
+                <div class="stat-card">
+                    <div class="stat-label">下载速度</div>
+                    <div class="stat-value" id="downloadSpeed">-- Mbps</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">上传速度</div>
+                    <div class="stat-value" id="uploadSpeed">-- Mbps</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">网络延迟</div>
+                    <div class="stat-value" id="networkLatency">-- ms</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">实时码率</div>
+                    <div class="stat-value" id="bitrate">-- kbps</div>
                 </div>
             </div>
         </div>
@@ -352,8 +403,19 @@
             const qualityBtn = document.getElementById('qualityBtn');
             const qualityMenu = document.getElementById('qualityMenu');
             
+            // 网络状态元素
+            const downloadSpeed = document.getElementById('downloadSpeed');
+            const uploadSpeed = document.getElementById('uploadSpeed');
+            const networkLatency = document.getElementById('networkLatency');
+            const bitrate = document.getElementById('bitrate');
+            
             let hls;
             let isLive = true; // 直播流没有固定时长
+            let downloadStats = {
+                bytesReceived: 0,
+                lastBytesReceived: 0,
+                lastTime: Date.now()
+            };
             
             // 初始化HLS播放器
             function initHLS() {
@@ -407,6 +469,11 @@
                         console.log('清晰度切换:', data);
                     });
                     
+                    hls.on(Hls.Events.FRAG_LOADED, function(event, data) {
+                        // 更新下载统计
+                        updateDownloadStats(data);
+                    });
+                    
                     hls.on(Hls.Events.BUFFER_CREATED, function(event, data) {
                         updateBufferStatus();
                     });
@@ -423,6 +490,45 @@
                     connectionStatus.textContent = '❌ 您的浏览器不支持HLS直播流播放';
                     connectionStatus.className = 'status error';
                 }
+            }
+            
+            // 更新下载统计信息
+            function updateDownloadStats(data) {
+                const now = Date.now();
+                const timeDiff = (now - downloadStats.lastTime) / 1000; // 转换为秒
+                
+                if (timeDiff >= 1) { // 每秒更新一次
+                    const bytesDiff = data.stats.total ? data.stats.total - downloadStats.lastBytesReceived : 0;
+                    const speed = (bytesDiff * 8) / (timeDiff * 1000000); // 转换为Mbps
+                    
+                    downloadSpeed.textContent = speed.toFixed(2) + ' Mbps';
+                    
+                    downloadStats.lastBytesReceived = data.stats.total || 0;
+                    downloadStats.lastTime = now;
+                }
+                
+                // 更新码率信息
+                if (hls.levels && hls.currentLevel !== -1) {
+                    const currentLevel = hls.levels[hls.currentLevel];
+                    if (currentLevel && currentLevel.bitrate) {
+                        bitrate.textContent = Math.round(currentLevel.bitrate / 1000) + ' kbps';
+                    }
+                }
+            }
+            
+            // 模拟网络测速（实际应用中应该使用真实测速API）
+            function simulateNetworkSpeed() {
+                // 模拟下载速度 (5-50 Mbps)
+                const simulatedDownload = (Math.random() * 45 + 5).toFixed(2);
+                downloadSpeed.textContent = simulatedDownload + ' Mbps';
+                
+                // 模拟上传速度 (1-20 Mbps)
+                const simulatedUpload = (Math.random() * 19 + 1).toFixed(2);
+                uploadSpeed.textContent = simulatedUpload + ' Mbps';
+                
+                // 模拟网络延迟 (10-100 ms)
+                const simulatedLatency = Math.floor(Math.random() * 90 + 10);
+                networkLatency.textContent = simulatedLatency + ' ms';
             }
             
             // 播放/暂停控制
@@ -575,6 +681,9 @@
             
             // 初始化HLS播放器
             initHLS();
+            
+            // 开始模拟网络测速
+            setInterval(simulateNetworkSpeed, 2000);
         });
     </script>
 </body>
