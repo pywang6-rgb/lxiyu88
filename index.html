@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>经文查询工具</title>
+    <style>
+        /* 全局基础样式 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+        }
+        body {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 0 15px;
+            line-height: 1.6;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        /* 输入区样式 */
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        #verse-input {
+            flex: 1;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        #search-btn {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        #search-btn:hover {
+            background: #0056b3;
+        }
+
+        /* 版本切换区样式 */
+        .version-group {
+            margin-bottom: 15px;
+        }
+        .version-btn {
+            padding: 8px 16px;
+            margin: 0 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background: #f8f9fa;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .version-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        #version-name {
+            margin-left: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        /* 状态区样式 */
+        #loading {
+            text-align: center;
+            color: #666;
+            padding: 10px;
+            display: none;
+        }
+        .error-group {
+            padding: 10px;
+            background: #f8d7da;
+            color: #721c24;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        #error-message {
+            margin: 0;
+        }
+
+        /* 结果区样式 */
+        .result-group {
+            margin-top: 20px;
+            display: none;
+        }
+        #verse-title {
+            font-size: 18px;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 8px;
+        }
+        #verse-content {
+            font-size: 16px;
+            line-height: 1.8;
+            margin-bottom: 15px;
+        }
+        .verse-num {
+            color: #007bff;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        #copy-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        #copy-btn:hover {
+            background: #218838;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 480px) {
+            .input-group {
+                flex-direction: column;
+            }
+            .version-btn {
+                margin-bottom: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>经文查询工具</h1>
+
+    <!-- 输入区 -->
+    <div class="input-group">
+        <input 
+            type="text" 
+            id="verse-input" 
+            placeholder="请输入经文位置（示例：创1:1、约翰3:16、创世记1:1-5）"
+        >
+        <button id="search-btn">搜索</button>
+    </div>
+
+    <!-- 版本切换区 -->
+    <div class="version-group">
+        <button class="version-btn active">和合本</button>
+        <button class="version-btn">环球译本</button>
+        <span id="version-name">和合本</span>
+    </div>
+
+    <!-- 加载状态区 -->
+    <div id="loading">加载中，请稍候...</div>
+
+    <!-- 错误提示区 -->
+    <div class="error-group">
+        <p id="error-message"></p>
+    </div>
+
+    <!-- 结果展示区 -->
+    <div class="result-group">
+        <h3 id="verse-title"></h3>
+        <div id="verse-content"></div>
+        <button id="copy-btn">复制经文</button>
+    </div>
+
+    <!-- 引入脚本文件（确保与HTML同级） -->
+    <script src="script.js"></script>
+</body>
+</html>
